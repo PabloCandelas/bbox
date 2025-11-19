@@ -31,7 +31,8 @@ setup(
     entry_points={
         'console_scripts': [
             'dummy = bbox.dummy:main',
-            'video = bbox.video:main'
+            'video = bbox.video:main',
+            'init_joy = bbox.init_joy:main',
         ],
     },
 )
