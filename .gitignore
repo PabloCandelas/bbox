@@ -1,0 +1,16 @@
+# ROS2 / Python / common ignores
+build/
+install/
+log/
+*.pyc
+__pycache__/
+*.egg-info/
+dist/
+.vscode/
+.idea/
+*.swp
+.DS_Store
+coverage/
+.coverage
+.pytest_cache/
+
