@@ -112,8 +112,7 @@ class JoyInit(Node):
         req.param1 = float(pin)
         req.param2 = float(value)
 
-        future = client.call_async(req)
-        future.add_done_callback(lambda _: self.get_logger().debug(f"Servo {pin} -> {value}"))
+        client.call_async(req)
 
     def set_stream_rate(self, rate):
         client = self.create_client(StreamRate, "set_stream_rate")
@@ -124,8 +123,7 @@ class JoyInit(Node):
         req.message_rate = rate
         req.on_off = True
 
-        future = client.call_async(req)
-        future.add_done_callback(lambda _: self.get_logger().info("Stream rate set."))
+        client.call_async(req)
 
     def arm_disarm(self, arm):
         """Arm or disarm the ROV."""
@@ -154,7 +152,6 @@ class JoyInit(Node):
         self.create_subscription(Twist, "cmd_vel", self.cmd_vel_cb, qos)
         self.create_subscription(Imu, "imu/data", self.imu_cb, qos)
         self.create_subscription(Float64, "global_position/rel_alt", self.depth_cb, qos)
-        self.create_subscription(Float64MultiArray, "ping1d/data", self.pinger_cb, qos)
 
     # ---------------- Joystick ----------------
 
@@ -241,11 +238,21 @@ class JoyInit(Node):
     # ---------------- RC Override ----------------
 
     def send_rc_override(self, pitch, roll, throttle, yaw, forward, lateral):
+        """Send RC override with exactly 18 channels as required by MAVROS."""
         msg = OverrideRCIn()
-        msg.channels = [
-            pitch, roll, throttle, yaw, forward, lateral,
-            1500, 1500
-        ]
+
+        # Create full 18-channel array initialized to 0 (ignored)
+        channels = [0] * 18
+
+        # Map outputs to channels 1–6
+        channels[0] = pitch
+        channels[1] = roll
+        channels[2] = throttle
+        channels[3] = yaw
+        channels[4] = forward
+        channels[5] = lateral
+
+        msg.channels = channels
         self.pub_rc_override.publish(msg)
 
     # ---------------- IMU ----------------
@@ -287,12 +294,9 @@ class JoyInit(Node):
     # ---------------- Depth ----------------
 
     def depth_cb(self, msg):
-        """Placeholder for depth-hold logic."""
         if self.init_depth:
             self.depth_ref = msg.data
             self.init_depth = False
-
-        # Correction_depth could be implemented here
 
     # =======================================================================
     # Camera Mount Control
