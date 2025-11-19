@@ -1,0 +1,10 @@
+<launch>		
+	<group> 
+	<arg name="namespace" default="bluerov2"/>
+
+	<node pkg="bbox" exec="video" name="video" namespace="$(var namespace)" output="screen">
+	</node>			
+		
+	</group>
+</launch>	
+
