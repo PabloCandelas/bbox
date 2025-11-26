@@ -33,6 +33,8 @@ setup(
             'dummy = bbox.dummy:main',
             'video = bbox.video:main',
             'init_joy = bbox.init_joy:main',
+            'webcam_publisher = bbox.webcam_publisher:main',
+            'hsv_calibrator = bbox.hsv_calibrator:main',
         ],
     },
 )
