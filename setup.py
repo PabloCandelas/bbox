@@ -35,6 +35,8 @@ setup(
             'init_joy = bbox.init_joy:main',
             'webcam_publisher = bbox.webcam_publisher:main',
             'hsv_calibrator = bbox.hsv_calibrator:main',
+            'aruco_pool_node = bbox.aruco_pool_node:main',
+            'aruco_localization = bbox.aruco_localization:main',
         ],
     },
 )

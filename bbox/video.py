@@ -148,8 +148,8 @@ class Controller(Node):
             return
 
         frame = self.frame()
-        width = int(1920/2)#1.5
-        height = int(1080/2)#1.5
+        width = int(1920)
+        height = int(1080)
         dim = (width, height)
         img = cv2.resize(frame, dim, interpolation = cv2.INTER_AREA)   
 
