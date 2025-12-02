@@ -54,6 +54,12 @@ class Controller(Node):
         self.image_publisher = self.create_publisher(Image, 'camera/image', 10) #image_publisher: publisher name
         #publishes messages of type Image to the topic 'bluerov2/camera/image'.(10): the queue size of the publisher.
 
+        # --- WINDOW SETUP (NEW) ---
+        # WINDOW_NORMAL allows you to resize the window with your mouse
+        cv2.namedWindow('BlueROV2 Camera', cv2.WINDOW_NORMAL)
+        # Set initial size to something manageable (e.g., 960x540) so it doesn't take up the whole screen
+        cv2.resizeWindow('BlueROV2 Camera', 960, 540)
+
         self.run()
 
         # Start update loop
@@ -148,6 +154,8 @@ class Controller(Node):
             return
 
         frame = self.frame()
+        
+        # This keeps the DATA at 1920x1080 (Good for AI)
         width = int(1920)
         height = int(1080)
         dim = (width, height)
@@ -156,14 +164,12 @@ class Controller(Node):
         #self.draw_gui(img, width, height)        
 
         # Convert OpenCV image to ROS 2 Image message
-        #This line converts the OpenCV image img (which is a numpy array) into a ROS 2 Image message (img_msg).
-        #The encoding='bgr8' parameter specifies the color encoding of the image (BGR format with 8 bits per channel).
         img_msg = self.bridge.cv2_to_imgmsg(img, encoding='bgr8')
+        
         # Publish the image message
-        #This line publishes the img_msg (which now contains the image data)
-        # to the 'bluerov2/camera/image' topic using self.image_publisher.
         self.image_publisher.publish(img_msg)
 
+        # Show the image (The window logic in __init__ allows this to be resizable)
         cv2.imshow('BlueROV2 Camera', img)
         if cv2.waitKey(1) & 0xFF == ord('q'):
             self.destroy_node()

@@ -148,6 +148,14 @@ class ArucoPoolNode(Node):
         self.ids_set_A = set(range(0, 9))
         self.ids_set_B = {42}
 
+        # --- WINDOW SETUP (NEW) ---
+        # Allow resizing and start with a reasonable size (960x540)
+        try:
+            cv2.namedWindow("Aruco Debug", cv2.WINDOW_NORMAL)
+            cv2.resizeWindow("Aruco Debug", 960, 540)
+        except Exception:
+            pass # Fails gracefully if no GUI is available
+
         self.get_logger().info("ArucoPoolNode initialized: detecting 4x4 ids 0-8 and 6x6 id 42.")
 
     def image_cb(self, msg: Image):
@@ -244,6 +252,7 @@ class ArucoPoolNode(Node):
 
         # Show debug image in OpenCV window (guarded to avoid crashes on headless systems)  # <<< CHANGED (small defensive change)
         try:
+            # Use the EXACT name defined in __init__
             cv2.imshow("Aruco Debug", debug_img)
             cv2.waitKey(1)  # Needed to refresh the window
         except Exception:

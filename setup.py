@@ -37,6 +37,7 @@ setup(
             'hsv_calibrator = bbox.hsv_calibrator:main',
             'aruco_pool_node = bbox.aruco_pool_node:main',
             'aruco_localization = bbox.aruco_localization:main',
+            'bbox_yolo_detection = bbox.bbox_yolo_detection:main',
         ],
     },
 )
