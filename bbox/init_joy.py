@@ -3,11 +3,9 @@
 joy_init: ROS2 joystick-based initialization and control node for BlueROV.
 
 Updates:
-- Feature: Added publishers for Button A and Button B states.
-  - Topics: "buttons/A" and "buttons/B" (std_msgs/Bool).
-  - Behavior: Publishes constantly (True/False) in the timer loop.
-- FIXED: Moved Gripper Logic to Timer Loop for smooth incremental control.
-- CHANGED: Gripper Toggle Button is now Button 8 (Logitech/Guide button).
+- REMOVED: Correction Mode logic (Button A no longer switches modes).
+- RETAINED: Button A and B state publishing ("buttons/A", "buttons/B").
+- Feature: Gripper Toggle Button is Button 8.
 """
 
 import math
@@ -61,13 +59,11 @@ class JoyInit(Node):
 
         # Internal State
         self.arming = False
-        # [Manual, Auto (Depth Hold), Correction]
+        # [Manual, Auto (Depth Hold)] - 3rd index removed/unused
         self.set_mode = [True, False, False] 
         self.init_angles = True
         self.init_depth = True
         self.depth_ref = 0.0
-        self.Correction_yaw = 1500
-        self.Correction_depth = 1500
         
         # Current RC commands [Pitch, Roll, Throttle, Yaw, Forward, Lateral]
         self.current_rc = [1500, 1500, 1500, 1500, 1500, 1500]
@@ -189,7 +185,7 @@ class JoyInit(Node):
 
         btn_manual = joy.buttons[3]
         btn_auto = joy.buttons[2]
-        btn_corr = joy.buttons[0] # Button A
+        # btn_corr removed (Button 0 is now just Button A state)
 
         btn_tilt_up = joy.buttons[4]
         btn_tilt_down = joy.buttons[5]
@@ -235,11 +231,7 @@ class JoyInit(Node):
                 self.set_mode = [False, True, False]
                 self.get_logger().info("Switched to DEPTH HOLD (ALT_HOLD)")
 
-        if btn_corr:
-            self.set_mode = [False, False, True]
-            self.init_angles = True
-            self.init_depth = True
-            self.get_logger().info("Mode: Correction")
+        # Correction Mode Logic Removed Here
 
         # Light Control
         if rt == -1 and self.light_pwm < self.light_max:
@@ -397,17 +389,6 @@ class JoyInit(Node):
             self.send_rc_override(*rc_to_send)
         
         # -----------------------------------
-
-        # CORRECTION MODE
-        if self.set_mode[2]:
-            self.send_rc_override(
-                1500,
-                1500,
-                self.Correction_depth,
-                self.Correction_yaw,
-                1500,
-                1500
-            )
 
 
 def main(args=None):
