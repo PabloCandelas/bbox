@@ -8,7 +8,7 @@
         <node pkg="bbox" exec="video" name="video" output="screen">
         </node>     
 
-        <node pkg="bbox" exec="aruco_pool_node" name="aruco_pool_node" output="screen">
+        <!-- <node pkg="bbox" exec="aruco_pool_node" name="aruco_pool_node" output="screen">
             <param name="camera_info_npz" value="bbox/pablos_camera_calb.npz"/>
             
             <param name="image_topic" value="camera/image"/>
@@ -22,7 +22,7 @@
             
             <param name="show_display" value="true"/>
             <param name="conf_thres" value="0.5"/>
-        </node>
+        </node> -->
 
     </group>
 </launch>
