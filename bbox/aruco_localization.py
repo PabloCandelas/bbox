@@ -1,274 +1,294 @@
 #!/usr/bin/env python3
 """
-aruco_localization_node.py
+aruco_localization.py
+ROS2 Node for BlueROV Localization using existing ArUco detections + Camera Tilt.
 
-- Loads a fixed map of aruco markers in the net frame.
-- Listens to detection TFs (camera -> aruco_<id>) and camera tilt (camera_tilt -> camera).
-- Computes net -> camera and net -> body (applying configurable offset and rotation).
-- Broadcasts TFs for visualization and publishes a single PoseArray topic with the computed poses.
-
-Topics / TFs used/produced:
- - reads: /tf (camera -> aruco_<id> from detector, camera_tilt -> camera from joy node)
- - publishes TFs (via /tf): net -> aruco_map_<id>, net -> camera_in_net, net -> body
- - publishes topic: /aruco_localization/poses (geometry_msgs/PoseArray) with header.frame_id = net_frame
+Updates:
+- FEATURE: Multi-Marker Weighted Averaging.
+  Calculates position based on Inverse Distance Weighting (1/dist).
+  Closer markers (more reliable) contribute more to the final estimated position.
+- FEATURE: Low-Pass Filter (Smoothing) with RESET LOGIC.
+- RETAINED: Static marker publishing and Tilt correction.
 """
 
 import rclpy
 from rclpy.node import Node
-from geometry_msgs.msg import Pose, PoseArray
-from geometry_msgs.msg import TransformStamped
-from tf2_ros import Buffer, TransformListener, TransformBroadcaster
+from std_msgs.msg import Int32MultiArray, Float64
+from geometry_msgs.msg import TransformStamped, PoseArray
+from tf2_ros import TransformBroadcaster, StaticTransformBroadcaster
 import numpy as np
 import math
+from scipy.spatial.transform import Rotation as R_scipy
 
-# --------- ADJUSTABLE TRANSFORMS / CONSTANTS ----------
-NET_FRAME = "net"
-BODY_FRAME = "body"
-CAMERA_FRAME = "camera"
-ARUCO_MAP_PREFIX = "aruco_map_"
+# ================= USER CONFIGURATION =================
 
-CAMERA_TO_BODY_PRE_TRANSLATION_Z = -0.23  # meters
-# Correct quaternion to map camera frame -> body frame (Z down, X forward, Y right)
-CAMERA_TO_BODY_ROT_QUAT = np.array([0.5, 0.5, 0.5, 0.5])
+# 1. KNOWN MARKER POSITIONS IN WORLD FRAME (map)
+# Format: ID: [x, y, z, qx, qy, qz, qw]
+KNOWN_MARKERS = {
+    0: [4.5, 7.0, 4.8, 0.7068252, 0.7073883, 0.0000327, 0.0000328],
+    1: [1.5, 1.0, 4.8, 0.7068252, 0.7073883, 0.0000327, 0.0000328],
+    2: [7.5, 4.0, 4.8, 0.7068252, 0.7073883, 0.0000327, 0.0000328],
+    3: [7.5, 7.0, 4.8, 0.7068252, 0.7073883, 0.0000327, 0.0000328],
+    4: [4.5, 4.0, 4.8, 0.7068252, 0.7073883, 0.0000327, 0.0000328],
+    5: [1.5, 7.0, 4.8, 0.7068252, 0.7073883, 0.0000327, 0.0000328],
+    6: [1.5, 4.0, 4.8, 0.7068252, 0.7073883, 0.0000327, 0.0000328],
+    7: [4.5, 1.0, 4.8, 0.7068252, 0.7073883, 0.0000327, 0.0000328],
+    8: [7.5, 1.0, 4.8, 0.7068252, 0.7073883, 0.0000327, 0.0000328],
+}
 
-LOOP_HZ = 10.0
+# 2. CAMERA MOUNTING OFFSET (Robot Center -> Camera Pivot)
+CAM_OFFSET_X = 0.2  # meters forward
+CAM_OFFSET_Y = 0.0  # meters left
+CAM_OFFSET_Z = 0.0  # meters up
 
-# Marker poses in net frame: (tx, ty, tz, qx, qy, qz, qw)
-marker_poses = [
-    (4.5, 7.0, 4.8, 0.7068252, 0.7073883, 0.0000327, 0.0000328),
-    (1.5, 1.0, 4.8, 0.7068252, 0.7073883, 0.0000327, 0.0000328),
-    (7.5, 4.0, 4.8, 0.7068252, 0.7073883, 0.0000327, 0.0000328),
-    (7.5, 7.0, 4.8, 0.7068252, 0.7073883, 0.0000327, 0.0000328),
-    (4.5, 4.0, 4.8, 0.7068252, 0.7073883, 0.0000327, 0.0000328),
-    (1.5, 7.0, 4.8, 0.7068252, 0.7073883, 0.0000327, 0.0000328),
-    (1.5, 4.0, 4.8, 0.7068252, 0.7073883, 0.0000327, 0.0000328),
-    (4.5, 1.0, 4.8, 0.7068252, 0.7073883, 0.0000327, 0.0000328),
-    (7.5, 1.0, 4.8, 0.7068252, 0.7073883, 0.0000327, 0.0000328),
-]
+# 3. SMOOTHING FACTOR (0.0 to 1.0)
+FILTER_ALPHA = 0.2 
 
-# ---------- helper math utilities ----------
-def quat_to_matrix(q):
-    x, y, z, w = q
-    n = math.sqrt(x*x + y*y + z*z + w*w)
-    if n == 0:
-        return np.eye(3)
-    x /= n; y /= n; z /= n; w /= n
-    xx, yy, zz = x*x, y*y, z*z
-    xy, xz, yz = x*y, x*z, y*z
-    wx, wy, wz = w*x, w*y, w*z
-    R = np.array([
-        [1 - 2*(yy+zz), 2*(xy - wz), 2*(xz + wy)],
-        [2*(xy + wz), 1 - 2*(xx+zz), 2*(yz - wx)],
-        [2*(xz - wy), 2*(yz + wx), 1 - 2*(xx+yy)]
-    ])
-    return R
+# 4. FILTER RESET TIMEOUT (seconds)
+# If no markers are seen for this duration, reset the filter to avoid "sliding"
+FILTER_TIMEOUT_S = 1.0
 
-def matrix_to_quat(R):
-    m00, m01, m02 = R[0,0], R[0,1], R[0,2]
-    m10, m11, m12 = R[1,0], R[1,1], R[1,2]
-    m20, m21, m22 = R[2,0], R[2,1], R[2,2]
-    trace = m00 + m11 + m22
-    if trace > 0:
-        s = 0.5 / math.sqrt(trace + 1.0)
-        w = 0.25 / s
-        x = (m21 - m12) * s
-        y = (m02 - m20) * s
-        z = (m10 - m01) * s
-    else:
-        if m00 > m11 and m00 > m22:
-            s = 2.0 * math.sqrt(1.0 + m00 - m11 - m22)
-            w = (m21 - m12) / s
-            x = 0.25 * s
-            y = (m01 + m10) / s
-            z = (m02 + m20) / s
-        elif m11 > m22:
-            s = 2.0 * math.sqrt(1.0 + m11 - m00 - m22)
-            w = (m02 - m20) / s
-            x = (m01 + m10) / s
-            y = 0.25 * s
-            z = (m12 + m21) / s
-        else:
-            s = 2.0 * math.sqrt(1.0 + m22 - m00 - m11)
-            w = (m10 - m01) / s
-            x = (m02 + m20) / s
-            y = (m12 + m21) / s
-            z = 0.25 * s
-    return np.array([x, y, z, w])
+# ======================================================
 
-def make_transform_matrix(t, q):
-    R = quat_to_matrix(q)
-    M = np.eye(4)
-    M[0:3, 0:3] = R
-    M[0:3, 3] = t
-    return M
+def get_tf_matrix_from_pose(pose):
+    mat = np.eye(4)
+    mat[0, 3] = pose.position.x
+    mat[1, 3] = pose.position.y
+    mat[2, 3] = pose.position.z
+    r = R_scipy.from_quat([pose.orientation.x, pose.orientation.y, pose.orientation.z, pose.orientation.w])
+    mat[:3, :3] = r.as_matrix()
+    return mat
 
-def invert_transform_matrix(M):
-    R = M[0:3,0:3]
-    t = M[0:3,3]
-    Rinv = R.T
-    tinv = -Rinv.dot(t)
-    Minv = np.eye(4)
-    Minv[0:3,0:3] = Rinv
-    Minv[0:3,3] = tinv
-    return Minv
+def get_tf_matrix_from_values(tvec, quat):
+    mat = np.eye(4)
+    mat[:3, 3] = tvec
+    r = R_scipy.from_quat(quat)
+    mat[:3, :3] = r.as_matrix()
+    return mat
 
-def transform_matrix_to_pose(M):
-    t = M[0:3,3]
-    q = matrix_to_quat(M[0:3,0:3])
-    p = Pose()
-    p.position.x = float(t[0])
-    p.position.y = float(t[1])
-    p.position.z = float(t[2])
-    p.orientation.x = float(q[0])
-    p.orientation.y = float(q[1])
-    p.orientation.z = float(q[2])
-    p.orientation.w = float(q[3])
-    return p
+def matrix_to_transform_msg(matrix, frame_id, child_frame_id, stamp):
+    t = TransformStamped()
+    t.header.stamp = stamp
+    t.header.frame_id = frame_id
+    t.child_frame_id = child_frame_id
+    t.transform.translation.x = matrix[0, 3]
+    t.transform.translation.y = matrix[1, 3]
+    t.transform.translation.z = matrix[2, 3]
+    r = R_scipy.from_matrix(matrix[:3, :3])
+    q = r.as_quat()
+    t.transform.rotation.x = q[0]
+    t.transform.rotation.y = q[1]
+    t.transform.rotation.z = q[2]
+    t.transform.rotation.w = q[3]
+    return t
 
-def average_poses(pose_matrices):
-    if len(pose_matrices) == 0:
-        return None
-    positions = np.array([M[0:3,3] for M in pose_matrices])
-    pos_mean = positions.mean(axis=0)
-    quats = np.array([matrix_to_quat(M[0:3,0:3]) for M in pose_matrices])
-    qsum = quats.sum(axis=0)
-    qnorm = qsum / np.linalg.norm(qsum)
-    return make_transform_matrix(pos_mean, qnorm)
-
-# ---------- Node ----------
-class ArucoLocalization(Node):
+class ArucoLocalizationNode(Node):
     def __init__(self):
-        super().__init__("aruco_localization")
-        self.tf_buffer = Buffer()
-        self.tf_listener = TransformListener(self.tf_buffer, self)
+        super().__init__("aruco_localization_node")
+
+        # Parameters
+        self.declare_parameter("camera_frame", "camera_optical") 
+        self.declare_parameter("base_frame", "base_link")        
+        self.declare_parameter("world_frame", "map")             
+
+        self.frame_camera = self.get_parameter("camera_frame").value
+        self.frame_base = self.get_parameter("base_frame").value
+        self.frame_world = self.get_parameter("world_frame").value
+
+        # Internal state
+        self.current_tilt_deg = 0.0
+        self.latest_ids = []
+        self.last_T_w_b = None 
+        
+        # Filtering State
+        self.filtered_pos = None
+        self.filtered_quat = None
+        self.last_detection_time = self.get_clock().now()
+
+        # Subscriptions
+        qos = rclpy.qos.QoSProfile(depth=10)
+        self.sub_tilt = self.create_subscription(Float64, "camera/tilt_angle", self.tilt_cb, 10)
+        self.sub_ids = self.create_subscription(Int32MultiArray, "aruco_pool/ids", self.ids_cb, qos)
+        self.sub_poses = self.create_subscription(PoseArray, "aruco_pool/poses", self.poses_cb, qos)
+
+        # Broadcasters
         self.tf_broadcaster = TransformBroadcaster(self)
-        self.pose_pub = self.create_publisher(PoseArray, "/aruco_localization/poses", 10)
+        self.static_broadcaster = StaticTransformBroadcaster(self)
 
-        # Precompute marker map
-        self.marker_map = {}
-        for mid, data in enumerate(marker_poses):
-            t = np.array(data[0:3])
-            q = np.array(data[3:7])
-            self.marker_map[mid] = make_transform_matrix(t, q)
+        # Publish Static Markers immediately
+        self.publish_static_markers()
 
-        self.last_broadcast = 0.0
-        self.broadcast_interval = 1.0
+        # Timer to publish Base->Camera TF continuously
+        self.timer = self.create_timer(0.05, self.timer_tf_callback)
+        
+        self.get_logger().info("Localization Node Ready. Smoothing & Timeout Enabled.")
 
-        self.net_frame = NET_FRAME
-        self.camera_frame = CAMERA_FRAME
-        self.body_frame = BODY_FRAME
-        self.map_prefix = ARUCO_MAP_PREFIX
+    def publish_static_markers(self):
+        """ Publishes all KNOWN_MARKERS as static TFs relative to the map """
+        static_transforms = []
+        now = self.get_clock().now().to_msg()
+        
+        for mid, data in KNOWN_MARKERS.items():
+            if len(data) == 7:
+                tvec = data[:3]
+                quat = data[3:]
+            else:
+                tvec = data[:3]
+                mr, mp, myaw = data[3:]
+                quat = R_scipy.from_euler('xyz', [mr, mp, myaw], degrees=False).as_quat()
+            
+            mat = get_tf_matrix_from_values(tvec, quat)
+            tf_msg = matrix_to_transform_msg(
+                mat, 
+                self.frame_world,       
+                f"fixed_marker_{mid}",  
+                now
+            )
+            static_transforms.append(tf_msg)
+        self.static_broadcaster.sendTransform(static_transforms)
 
-        self.camera_to_body_pre_t = np.array([0.0, 0.0, CAMERA_TO_BODY_PRE_TRANSLATION_Z])
-        self.camera_to_body_rot_q = CAMERA_TO_BODY_ROT_QUAT
+    def tilt_cb(self, msg):
+        self.current_tilt_deg = msg.data
 
-        self.timer = self.create_timer(1.0 / LOOP_HZ, self.timer_cb)
-        self.get_logger().info("ArucoLocalization ready.")
+    def ids_cb(self, msg):
+        self.latest_ids = msg.data
 
-    def broadcast_marker_map_frames(self):
-        for mid, M in self.marker_map.items():
-            t = TransformStamped()
-            t.header.stamp = self.get_clock().now().to_msg()
-            t.header.frame_id = self.net_frame
-            t.child_frame_id = f"{self.map_prefix}{mid}"
-            t.transform.translation.x = float(M[0,3])
-            t.transform.translation.y = float(M[1,3])
-            t.transform.translation.z = float(M[2,3])
-            q = matrix_to_quat(M[0:3,0:3])
-            t.transform.rotation.x = float(q[0])
-            t.transform.rotation.y = float(q[1])
-            t.transform.rotation.z = float(q[2])
-            t.transform.rotation.w = float(q[3])
-            self.tf_broadcaster.sendTransform(t)
+    def get_base_to_optical_transform(self):
+        T_base_mount = np.eye(4)
+        T_base_mount[:3, 3] = [CAM_OFFSET_X, CAM_OFFSET_Y, CAM_OFFSET_Z]
+        r_tilt = R_scipy.from_euler('y', self.current_tilt_deg, degrees=True)
+        T_tilt = np.eye(4)
+        T_tilt[:3, :3] = r_tilt.as_matrix()
+        T_opt = np.eye(4)
+        T_opt[:3, :3] = np.array([[0, -1, 0], [0, 0, -1], [1, 0, 0]])
+        return T_base_mount @ T_tilt @ T_opt
 
-    def lookup_camera_to_aruco(self, mid):
-        aruco_frame = f"aruco_{mid}"
-        try:
-            t = self.tf_buffer.lookup_transform(aruco_frame, self.camera_frame, rclpy.time.Time(), timeout=rclpy.duration.Duration(seconds=0.5))
-            tx, ty, tz = t.transform.translation.x, t.transform.translation.y, t.transform.translation.z
-            qx, qy, qz, qw = t.transform.rotation.x, t.transform.rotation.y, t.transform.rotation.z, t.transform.rotation.w
-            return make_transform_matrix(np.array([tx, ty, tz]), np.array([qx, qy, qz, qw]))
-        except Exception:
-            return None
+    def timer_tf_callback(self):
+        now = self.get_clock().now().to_msg()
+        
+        # 1. Base -> Camera Optical
+        T_base_opt = self.get_base_to_optical_transform()
+        tf_cam = matrix_to_transform_msg(
+            T_base_opt, 
+            self.frame_base, 
+            self.frame_camera, 
+            now
+        )
+        self.tf_broadcaster.sendTransform(tf_cam)
 
-    def timer_cb(self):
-        now = self.get_clock().now().nanoseconds / 1e9
-        if now - self.last_broadcast > self.broadcast_interval:
-            self.broadcast_marker_map_frames()
-            self.last_broadcast = now
+        # 2. Map -> Base
+        if self.last_T_w_b is not None:
+            tf_map = matrix_to_transform_msg(
+                self.last_T_w_b,
+                self.frame_world,
+                self.frame_base,
+                now 
+            )
+            self.tf_broadcaster.sendTransform(tf_map)
 
-        candidate_camera_in_net = []
-        candidate_body_in_net = []
+    def poses_cb(self, msg: PoseArray):
+        if not self.latest_ids or len(self.latest_ids) != len(msg.poses):
+            return
 
-        for mid, M_map in self.marker_map.items():
-            M_cam_to_aruco = self.lookup_camera_to_aruco(mid)
-            if M_cam_to_aruco is None:
-                continue
-            M_aruco_to_cam = invert_transform_matrix(M_cam_to_aruco)
-            M_net_to_cam = M_map.dot(M_aruco_to_cam)
-            candidate_camera_in_net.append(M_net_to_cam)
+        # 1. Static Transform: Base -> Camera Optical
+        T_base_opt = self.get_base_to_optical_transform()
+        T_opt_base = np.linalg.inv(T_base_opt)
 
-            T_pre = np.eye(4)
-            T_pre[0:3,3] = self.camera_to_body_pre_t
-            R_cb = quat_to_matrix(self.camera_to_body_rot_q)
-            T_rot = np.eye(4)
-            T_rot[0:3,0:3] = R_cb
-            M_cam_to_body_local = T_rot.dot(T_pre)
-            M_net_to_body = M_net_to_cam.dot(M_cam_to_body_local)
-            candidate_body_in_net.append(M_net_to_body)
+        # Storage for all computed robot poses this frame
+        measured_positions = []
+        measured_quats = []
+        measured_weights = []
 
-        pose_array = PoseArray()
-        pose_array.header.frame_id = self.net_frame
-        pose_array.header.stamp = self.get_clock().now().to_msg()
+        # 2. Loop through ALL detected markers
+        for mid, pose in zip(self.latest_ids, msg.poses):
+            if mid in KNOWN_MARKERS:
+                marker_data = KNOWN_MARKERS[mid]
+                if len(marker_data) == 7:
+                    tvec = marker_data[:3]
+                    quat_w_m = marker_data[3:]
+                else:
+                    tvec = marker_data[:3]
+                    mr, mp, myaw = marker_data[3:]
+                    quat_w_m = R_scipy.from_euler('xyz', [mr, mp, myaw], degrees=False).as_quat()
 
-        if candidate_camera_in_net:
-            M_cam = average_poses(candidate_camera_in_net)
-            tcam = TransformStamped()
-            tcam.header.stamp = self.get_clock().now().to_msg()
-            tcam.header.frame_id = self.net_frame
-            tcam.child_frame_id = "camera_in_net"
-            tc = M_cam[0:3,3]
-            rc = matrix_to_quat(M_cam[0:3,0:3])
-            tcam.transform.translation.x = float(tc[0])
-            tcam.transform.translation.y = float(tc[1])
-            tcam.transform.translation.z = float(tc[2])
-            tcam.transform.rotation.x = float(rc[0])
-            tcam.transform.rotation.y = float(rc[1])
-            tcam.transform.rotation.z = float(rc[2])
-            tcam.transform.rotation.w = float(rc[3])
-            self.tf_broadcaster.sendTransform(tcam)
-            pose_array.poses.append(transform_matrix_to_pose(M_cam))
+                # Calculate Distance for Weighting
+                dist_sq = pose.position.x**2 + pose.position.y**2 + pose.position.z**2
+                dist = math.sqrt(dist_sq)
+                
+                # Weight = 1 / Distance (Closer is better)
+                # Add small epsilon to avoid div by zero, though unlikely
+                weight = 1.0 / (dist + 0.1) 
 
-        if candidate_body_in_net:
-            M_body = average_poses(candidate_body_in_net)
-            tbody = TransformStamped()
-            tbody.header.stamp = self.get_clock().now().to_msg()
-            tbody.header.frame_id = self.net_frame
-            tbody.child_frame_id = self.body_frame
-            tb = M_body[0:3,3]
-            rb = matrix_to_quat(M_body[0:3,0:3])
-            tbody.transform.translation.x = float(tb[0])
-            tbody.transform.translation.y = float(tb[1])
-            tbody.transform.translation.z = float(tb[2])
-            tbody.transform.rotation.x = float(rb[0])
-            tbody.transform.rotation.y = float(rb[1])
-            tbody.transform.rotation.z = float(rb[2])
-            tbody.transform.rotation.w = float(rb[3])
-            self.tf_broadcaster.sendTransform(tbody)
-            pose_array.poses.append(transform_matrix_to_pose(M_body))
+                T_w_m = get_tf_matrix_from_values(tvec, quat_w_m)
+                T_opt_m = get_tf_matrix_from_pose(pose)
 
-        self.pose_pub.publish(pose_array)
+                # Solve: Map -> Base (Candidate)
+                T_opt_m_inv = np.linalg.inv(T_opt_m)
+                T_w_opt = T_w_m @ T_opt_m_inv
+                T_w_b = T_w_opt @ T_opt_base
+                
+                # Extract Translation
+                trans = T_w_b[:3, 3]
+                # Extract Rotation
+                r = R_scipy.from_matrix(T_w_b[:3, :3])
+                q = r.as_quat()
+
+                measured_positions.append(trans)
+                measured_quats.append(q)
+                measured_weights.append(weight)
+
+        if not measured_positions:
+            return
+
+        # 3. Weighted Average of measurements
+        weights = np.array(measured_weights)
+        
+        # Weighted Position
+        avg_pos = np.average(measured_positions, axis=0, weights=weights)
+        
+        # Weighted Quaternions (Handle sign flip)
+        ref_quat = measured_quats[0]
+        aligned_quats = []
+        for q in measured_quats:
+            if np.dot(q, ref_quat) < 0:
+                aligned_quats.append(-q)
+            else:
+                aligned_quats.append(q)
+        
+        # Weighted Average of aligned quaternions
+        avg_quat = np.average(aligned_quats, axis=0, weights=weights)
+        norm = np.linalg.norm(avg_quat)
+        if norm > 0:
+            avg_quat /= norm
+
+        # 4. Check Time Gap (Filter Reset Logic)
+        now = self.get_clock().now()
+        dt = (now - self.last_detection_time).nanoseconds / 1e9
+        
+        if self.filtered_pos is None or dt > FILTER_TIMEOUT_S:
+            # RESET FILTER (Gap too long, jump to new position)
+            self.filtered_pos = avg_pos
+            self.filtered_quat = avg_quat
+        else:
+            # APPLY SMOOTHING (Continuous movement)
+            self.filtered_pos = FILTER_ALPHA * avg_pos + (1.0 - FILTER_ALPHA) * self.filtered_pos
+            # Slerp approximation for filter
+            self.filtered_quat = FILTER_ALPHA * avg_quat + (1.0 - FILTER_ALPHA) * self.filtered_quat
+            # Re-normalize after lerp
+            self.filtered_quat /= np.linalg.norm(self.filtered_quat)
+        
+        # Update last valid detection time
+        self.last_detection_time = now
+
+        # 5. Reconstruct the final Smoothed Transform
+        self.last_T_w_b = get_tf_matrix_from_values(self.filtered_pos, self.filtered_quat)
 
 def main(args=None):
     rclpy.init(args=args)
-    node = ArucoLocalization()
-    try:
-        rclpy.spin(node)
-    except KeyboardInterrupt:
-        pass
-    finally:
-        node.destroy_node()
-        rclpy.shutdown()
+    node = ArucoLocalizationNode()
+    rclpy.spin(node)
+    node.destroy_node()
+    rclpy.shutdown()
 
 if __name__ == "__main__":
     main()

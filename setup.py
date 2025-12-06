@@ -38,6 +38,10 @@ setup(
             'aruco_pool_node = bbox.aruco_pool_node:main',
             'aruco_localization = bbox.aruco_localization:main',
             'bbox_yolo_detection = bbox.bbox_yolo_detection:main',
+            'bbox_visual_approach = bbox.bbox_visual_approach:main',
+
+            # NEW: Navigation node
+            'navigation_node = bbox.navigation.navigation_node:main',
         ],
     },
 )

@@ -13,9 +13,9 @@
             
             <param name="image_topic" value="camera/image"/>
             <param name="debug_image_topic" value="aruco/debug_image"/>
-        </node>
+        </node> -->
 
-        <node pkg="bbox" exec="bbox_yolo_detection" name="bbox_yolo_detection" output="screen">
+        <!-- <node pkg="bbox" exec="bbox_yolo_detection" name="bbox_yolo_detection" output="screen">
             <param name="model_path" value="$(var model_path)"/>
             
             <param name="camera_topic" value="camera/image"/>

@@ -1,0 +1,30 @@
+<launch>
+    <!-- Arguments -->
+    <arg name="model_path" default="bbox/best.pt"/>
+    <arg name="namespace" default="bluerov2"/>
+    <arg name="camera_calib" default="bbox/pablos_camera_calb.npz"/>
+
+    <!-- Namespace Group -->
+    <group> 
+        <push_ros_namespace namespace="$(var namespace)"/>
+
+        <!-- 1. Detection Node -->
+        <node pkg="bbox" exec="aruco_pool_node" name="aruco_pool_node" output="screen">
+            <param name="camera_info_npz" value="$(var camera_calib)"/>
+            <param name="image_topic" value="camera/image"/>
+            <param name="debug_image_topic" value="aruco/debug_image"/>
+            
+            <!-- CRITICAL: Must match localization node frame -->
+            <param name="camera_frame" value="camera_optical"/>
+            <param name="publish_tf" value="true"/> <!-- Turn ON to see individual marker TFs for debugging -->
+        </node>
+
+        <!-- 2. Localization Node -->
+        <!-- <node pkg="bbox" exec="aruco_localization" name="aruco_localization_node" output="screen">
+            <param name="camera_frame" value="camera_optical"/>
+            <param name="base_frame" value="base_link"/>
+            <param name="world_frame" value="map"/>
+        </node> -->
+
+    </group>
+</launch>

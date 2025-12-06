@@ -1,17 +1,14 @@
 #!/usr/bin/env python3
 """
 aruco_pool_node.py
-ROS2 Humble Python node for detecting multiple ArUco markers (OpenCV 4.7+/4.12 API).
+ROS2 Humble Python node for detecting multiple ArUco markers.
 
-Detects:
- - DICT_4X4_50 ids 0..8 (size 0.30 m)
- - DICT_6X6_50 id 42             (size 0.30 m)
-
-Publishes:
- - aruco_pool/poses (geometry_msgs/PoseArray)
- - aruco_pool/ids   (std_msgs/Int32MultiArray)
- - TF frames aruco_<id> (optional, camera-relative)
- - debug image (optional)
+Updates:
+- Feature: AUTO-SCALING of Camera Matrix. Detects if the calibration resolution 
+  differs from the actual image resolution and scales the matrix automatically.
+  (Fixes "axes not displaying where they should" / incorrect TF positions).
+- REVERTED: TF timestamps now use "Current Time" (self.get_clock().now()) for better responsiveness.
+- RETAINED: OpenCV 4.7+ compatibility fix (prevents crashes on newer systems).
 """
 
 import rclpy
@@ -126,6 +123,9 @@ class ArucoPoolNode(Node):
 
         self.camera_matrix, self.dist_coeffs = load_camera_calibration(self.npz_path)
         self.get_logger().info(f"Loaded calibration from: {self.npz_path}")
+        
+        # Flag to check scaling on first frame
+        self.matrix_scaled = False
 
         # Bridge & TF
         self.bridge = CvBridge()
@@ -141,6 +141,10 @@ class ArucoPoolNode(Node):
         self.dict_4x4 = cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_4X4_50)
         self.dict_6x6 = cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_6X6_50)
         self.params = cv2.aruco.DetectorParameters()
+        
+        # Improve detection stability
+        self.params.cornerRefinementMethod = cv2.aruco.CORNER_REFINE_SUBPIX
+
         self.detector_4x4 = cv2.aruco.ArucoDetector(self.dict_4x4, self.params)
         self.detector_6x6 = cv2.aruco.ArucoDetector(self.dict_6x6, self.params)
 
@@ -148,15 +152,45 @@ class ArucoPoolNode(Node):
         self.ids_set_A = set(range(0, 9))
         self.ids_set_B = {42}
 
-        # --- WINDOW SETUP (NEW) ---
-        # Allow resizing and start with a reasonable size (960x540)
+        # --- WINDOW SETUP ---
         try:
             cv2.namedWindow("Aruco Debug", cv2.WINDOW_NORMAL)
             cv2.resizeWindow("Aruco Debug", 960, 540)
         except Exception:
-            pass # Fails gracefully if no GUI is available
+            pass 
 
         self.get_logger().info("ArucoPoolNode initialized: detecting 4x4 ids 0-8 and 6x6 id 42.")
+
+    def check_and_scale_matrix(self, height, width):
+        """ Scales the camera matrix if the image resolution doesn't match the calibration. """
+        if self.matrix_scaled:
+            return
+
+        # Principal point (cx, cy) is usually at the center (width/2, height/2)
+        cx = self.camera_matrix[0, 2]
+        cy = self.camera_matrix[1, 2]
+        
+        expected_w = cx * 2.0
+        expected_h = cy * 2.0
+        
+        # Calculate scale factors
+        scale_x = width / expected_w
+        scale_y = height / expected_h
+        
+        # If mismatch is significant (>5%), scale the matrix
+        if abs(scale_x - 1.0) > 0.05 or abs(scale_y - 1.0) > 0.05:
+            self.get_logger().warn(
+                f"Resolution Mismatch! Image: {width}x{height}, Calibration implies: {int(expected_w)}x{int(expected_h)}. "
+                f"Scaling matrix by factor X:{scale_x:.2f}, Y:{scale_y:.2f}"
+            )
+            self.camera_matrix[0, 0] *= scale_x # fx
+            self.camera_matrix[1, 1] *= scale_y # fy
+            self.camera_matrix[0, 2] *= scale_x # cx
+            self.camera_matrix[1, 2] *= scale_y # cy
+        else:
+            self.get_logger().info(f"Resolution Verified: Image matches Calibration ({width}x{height}).")
+            
+        self.matrix_scaled = True
 
     def image_cb(self, msg: Image):
         # Convert ROS Image to OpenCV
@@ -166,6 +200,9 @@ class ArucoPoolNode(Node):
             self.get_logger().error(f"cv_bridge error: {e}")
             return
 
+        h, w = frame.shape[:2]
+        self.check_and_scale_matrix(h, w)
+
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         detections = []
 
@@ -174,11 +211,11 @@ class ArucoPoolNode(Node):
         if ids_4x4 is not None and len(ids_4x4) > 0:
             for i, mid in enumerate(ids_4x4.flatten()):
                 if int(mid) in self.ids_set_A:
-                    # Use the standalone function to compute pose (works with opencv-contrib).  # <<< CHANGED
+                    # Pose Estimation
                     rvecs, tvecs, _ = cv2.aruco.estimatePoseSingleMarkers(
                         [corners_4x4[i]], self.marker_size_m, self.camera_matrix, self.dist_coeffs
                     )
-                    rvec = rvecs[0].flatten()  # flatten to (3,)
+                    rvec = rvecs[0].flatten()  
                     tvec = tvecs[0].flatten()
                     detections.append((int(mid), corners_4x4[i], rvec, tvec))
 
@@ -187,7 +224,7 @@ class ArucoPoolNode(Node):
         if ids_6x6 is not None and len(ids_6x6) > 0:
             for i, mid in enumerate(ids_6x6.flatten()):
                 if int(mid) in self.ids_set_B:
-                    # Use the standalone function to compute pose (works with opencv-contrib).  # <<< CHANGED
+                    # Pose Estimation
                     rvecs, tvecs, _ = cv2.aruco.estimatePoseSingleMarkers(
                         [corners_6x6[i]], self.marker_size_m, self.camera_matrix, self.dist_coeffs
                     )
@@ -197,8 +234,12 @@ class ArucoPoolNode(Node):
 
         # --- Prepare messages ---
         pose_array = PoseArray()
-        pose_array.header = msg.header
-        pose_array.header.frame_id = self.camera_frame
+        # Use image header for PoseArray to match detection source
+        pose_array.header = msg.header 
+        
+        if self.camera_frame:
+             pose_array.header.frame_id = self.camera_frame
+
         ids_msg = Int32MultiArray()
         ids_msg.data = []
         debug_img = frame.copy()
@@ -209,11 +250,18 @@ class ArucoPoolNode(Node):
             pose_array.poses.append(pose)
             ids_msg.data.append(int(marker_id))
 
-            # Draw marker & axis
+            # Draw marker & axis (Robust to OpenCV version changes)
             try:
                 cv2.aruco.drawDetectedMarkers(debug_img, [corners], np.array([[marker_id]]))
-                cv2.aruco.drawAxis(debug_img, self.camera_matrix, self.dist_coeffs, rvec, tvec, self.marker_size_m * 0.5)
+                
+                # Try new API (OpenCV 4.7+)
+                if hasattr(cv2, 'drawFrameAxes'):
+                    cv2.drawFrameAxes(debug_img, self.camera_matrix, self.dist_coeffs, rvec, tvec, self.marker_size_m * 0.5)
+                # Fallback to old API (OpenCV <= 4.6)
+                elif hasattr(cv2.aruco, 'drawAxis'):
+                    cv2.aruco.drawAxis(debug_img, self.camera_matrix, self.dist_coeffs, rvec, tvec, self.marker_size_m * 0.5)
             except Exception:
+                # If both fail, just draw a green box so we know it was detected
                 pts = corners.reshape((4, 2)).astype(int)
                 cv2.polylines(debug_img, [pts], isClosed=True, color=(0, 255, 0), thickness=2)
 
@@ -229,15 +277,19 @@ class ArucoPoolNode(Node):
             cv2.rectangle(debug_img, (text_org[0]-3, text_org[1]-h-3), (text_org[0]+w+3, text_org[1]+3), (0,0,0), -1)
             cv2.putText(debug_img, overlay, text_org, font, scale, (255,255,255), thickness, cv2.LINE_AA)
 
-            # Publish TF (camera_frame -> aruco_<id>)  -- this is camera-relative as you requested (UNCHANGED) 
+            # Publish TF (camera_frame -> aruco_<id>)
             if self.publish_tf:
                 t = TransformStamped()
+                
+                # REVERTED: Use current time for responsiveness (fixes lag/extrapolation issues)
                 t.header.stamp = self.get_clock().now().to_msg()
+                
                 t.header.frame_id = self.camera_frame
                 t.child_frame_id = f"aruco_{int(marker_id)}"
                 t.transform.translation.x = float(tvec[0])
                 t.transform.translation.y = float(tvec[1])
                 t.transform.translation.z = float(tvec[2])
+                
                 R, _ = cv2.Rodrigues(rvec)
                 qx, qy, qz, qw = rotation_matrix_to_quaternion(R)
                 t.transform.rotation.x = float(qx)
@@ -250,11 +302,10 @@ class ArucoPoolNode(Node):
         self.pose_pub.publish(pose_array)
         self.ids_pub.publish(ids_msg)
 
-        # Show debug image in OpenCV window (guarded to avoid crashes on headless systems)  # <<< CHANGED (small defensive change)
+        # Show debug image
         try:
-            # Use the EXACT name defined in __init__
             cv2.imshow("Aruco Debug", debug_img)
-            cv2.waitKey(1)  # Needed to refresh the window
+            cv2.waitKey(1)
         except Exception:
             pass
 
