@@ -23,13 +23,11 @@
 
         <!-- 3. Visual Servoing Node -->
         <node pkg="bbox" exec="bbox_visual_approach" name="bbox_visual_approach" output="screen">
-            <!-- Control Gains (Tune these here without changing python code) -->
-            <param name="kp_heave" value="0.002"/>
-            <param name="kp_yaw" value="0.001"/>
-            <param name="kp_surge" value="0.005"/>
+
+            <param name="target_height_px" value="200.0"/>
             
-            <!-- Target Approach Settings -->
-            <param name="target_width" value="200.0"/>
+            <param name="target_altitude" value="-4.65"/>
+            <param name="altitude_tolerance" value="0.15"/>
         </node>
 
     </group>
