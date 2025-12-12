@@ -5,9 +5,8 @@ Visual Servoing Node for BlueROV.
 
 Updates:
 - LOGIC: Stage 6 now aligns 3 points: Box Center, Handle Center, and Target.
-  - Sway: Minimizes (Box - Handle) error (Perspective alignment).
-  - Yaw: Minimizes (Handle - Target) error (Centering alignment).
-- CONDITION: Final Surge only triggers if both Perspective and Centering are good.
+- FEATURE: Status messages are now descriptive "Phase X..." explanations 
+  published to /servoing/status for UI/User feedback.
 """
 
 import rclpy
@@ -48,7 +47,7 @@ class BBoxVisualApproach(Node):
         # New Phase 5/6 Params
         self.declare_parameter('sway_tolerance_final', 5.0) 
         self.declare_parameter('altitude_tolerance_final', 0.04) 
-        self.declare_parameter('target_altitude_final', -4.82) 
+        self.declare_parameter('target_altitude_final', -4.79) 
         self.declare_parameter('final_surge_speed', 0.4) 
         
         # TARGETS
@@ -217,7 +216,6 @@ class BBoxVisualApproach(Node):
             self.sway_integral = -self.sway_i_max / self.ki_sway
             
         y_cmd = p_term + i_term_val
-        # Sway usually needs less max thrust than surge/heave
         return max(min(y_cmd, 0.3), -0.3) 
 
     # --- HELPER: CALCULATE YAW (PD) ---
@@ -242,6 +240,7 @@ class BBoxVisualApproach(Node):
 
         cmd = Twist()
 
+        # Target Check 
         if self.state < 7 and not self.box_visible:
             self.state = 0
             self.status_msg = "NO BOX DETECTED"
@@ -258,7 +257,7 @@ class BBoxVisualApproach(Node):
         # --- STATE 1: INITIAL DEPTH ---
         if self.state == 1:
             err = self.target_alt - self.current_alt
-            self.status_msg = f"S1: DEPTH (Alt: {self.current_alt:.2f})"
+            self.status_msg = f"Phase 1: Going to approximate depth {self.target_alt}m (Curr: {self.current_alt:.2f})"
             if abs(err) < self.alt_tol:
                 self.get_logger().info("✅ DEPTH REACHED.")
                 self.state = 2 
@@ -267,7 +266,7 @@ class BBoxVisualApproach(Node):
 
         # --- STATE 2: YAW ALIGNMENT ---
         elif self.state == 2:
-            self.status_msg = f"S2: HORIZONTAL (Err X: {self.err_box_x:.0f})"
+            self.status_msg = f"Phase 2: Aligning with BBox horizontally (Err: {self.err_box_x:.0f})"
             yaw_out = self.get_yaw_cmd(self.err_box_x)
             if abs(self.err_box_x) < self.deadzone_x:
                 self.get_logger().info("✅ HORIZONTAL ALIGNED.")
@@ -280,13 +279,13 @@ class BBoxVisualApproach(Node):
         elif self.state == 3:
             current_h = self.box_h if self.box_h > 0 else 1.0
             height_err = self.target_height - current_h
-            self.status_msg = f"S3: APPROACH (H: {current_h:.0f})"
+            self.status_msg = f"Phase 3: Approaching BBox to detect handle (Size: {current_h:.0f}/{self.target_height:.0f})"
             
             if height_err <= self.surge_tol:
                 self.get_logger().info("✅ TARGET REACHED.")
                 self.state = 4 
+                # Reset Yaw D-term memory before switching target to Handle
                 self.prev_yaw_err = self.err_hdl_x 
-                self.sway_integral = 0.0 
                 return
             
             cmd.linear.x = self.kp_surge * height_err
@@ -301,21 +300,18 @@ class BBoxVisualApproach(Node):
         # --- STATE 4: COARSE HANDLE ALIGNMENT ---
         elif self.state == 4:
             if not self.handle_visible:
-                self.status_msg = "S4: WAITING FOR HANDLE..."
+                self.status_msg = "Phase 4: Waiting for Handle detection..."
                 cmd.linear.z = self.get_heave_cmd(self.target_alt)
-                # Fallback to box yaw if handle lost
                 cmd.angular.z = self.get_yaw_cmd(self.err_box_x) 
             else:
-                # LOGIC: Align Box Center to Handle Center
                 alignment_err = self.err_box_x - self.err_hdl_x
-                self.status_msg = f"S4: ALIGN BvH (Diff: {alignment_err:.0f})"
+                self.status_msg = f"Phase 4: Coarse alignment BBox-Handle (Diff: {alignment_err:.0f})"
                 
                 if abs(alignment_err) < self.sway_tol:
                     self.get_logger().info("✅ HANDLE COARSE ALIGNED.")
                     self.state = 5 
                     return
                 else:
-                    # Sway using PI
                     cmd.linear.y = self.get_sway_cmd(alignment_err)
 
                 cmd.angular.z = self.get_yaw_cmd(self.err_hdl_x)
@@ -327,15 +323,12 @@ class BBoxVisualApproach(Node):
             cmd.linear.z = self.get_heave_cmd(self.target_alt_final)
             
             if not self.handle_visible:
-                self.status_msg = "S5: LOST HANDLE!"
+                self.status_msg = "Phase 5: Handle Lost! Holding..."
             else:
-                # LOGIC: Align Box Center to Handle Center
                 alignment_err = self.err_box_x - self.err_hdl_x
-                self.status_msg = f"S5: DESCEND & ALIGN (D_Err: {err_depth:.2f} | BvH: {alignment_err:.0f})"
+                self.status_msg = f"Phase 5: Descending to {self.target_alt_final}m & Aligning (D_Err: {err_depth:.2f} | A_Err: {alignment_err:.0f})"
                 
-                # Sway using PI
                 cmd.linear.y = self.get_sway_cmd(alignment_err)
-                
                 cmd.angular.z = self.get_yaw_cmd(self.err_hdl_x)
 
                 depth_good = abs(err_depth) < self.alt_tol_final
@@ -353,22 +346,19 @@ class BBoxVisualApproach(Node):
                     self.sway_integral = 0.0 # Reset I-term for final stage
                     return
 
-        # --- STATE 6: FINAL STATION KEEPING (ALIGN 3 POINTS) ---
+        # --- STATE 6: FINAL STATION KEEPING (HANDLE vs TARGET) ---
         elif self.state == 6:
             err_depth = self.target_alt_final - self.current_alt
             cmd.linear.z = self.get_heave_cmd(self.target_alt_final)
 
             if not self.handle_visible or not self.box_visible:
-                self.status_msg = "S6: LOST VISUALS!"
+                self.status_msg = "Phase 6: Visuals Unstable..."
             else:
                 # 1. Perspective Alignment (Sway): Align Box to Handle
-                # If we align Box to Handle (Sway), AND Handle to Target (Yaw), 
-                # then Box, Handle, and Target are all in a line.
                 persp_err = self.err_box_x - self.err_hdl_x
                 cmd.linear.y = self.get_sway_cmd(persp_err, kp=self.kp_sway_final)
 
                 # 2. Centering Alignment (Yaw): Align Handle to Target
-                # Using Handle as the pivot point
                 center_err = self.err_hdl_x
                 cmd.angular.z = self.get_yaw_cmd(center_err, kp=self.kp_yaw_final)
 
@@ -381,15 +371,14 @@ class BBoxVisualApproach(Node):
                 # Exit Logic
                 depth_good = abs(err_depth) < self.alt_tol_final
                 persp_good = abs(persp_err) < self.sway_tol_final
-                center_good = abs(center_err) < self.deadzone_x # Using yaw deadzone for centering
+                center_good = abs(center_err) < self.deadzone_x 
                 surge_good = abs(height_err) < self.surge_tol 
 
-                self.status_msg = f"S6: LOCKING (P:{persp_good} C:{center_good} Sz:{surge_good})"
+                self.status_msg = f"Phase 6: Final 3-Point Station Keeping (P:{persp_good} C:{center_good} Sz:{surge_good})"
                 
                 if self.debug:
                     self.get_logger().info(f"[DEBUG S6] PerspErr:{persp_err:.1f} CenterErr:{center_err:.1f}")
 
-                # Require ALL alignments to be true
                 if depth_good and persp_good and center_good and surge_good:
                     self.get_logger().info("GOING >:)")
                     self.state = 7
@@ -401,7 +390,7 @@ class BBoxVisualApproach(Node):
             time_left = (self.surge_deadline - self.get_clock().now()).nanoseconds / 1e9
             
             if time_left > 0:
-                self.status_msg = f"S7: GOING >:) ({time_left:.1f}s)"
+                self.status_msg = f"Phase 7: GOING >:) (Blind Surge: {time_left:.1f}s)"
                 cmd.linear.x = self.final_surge_spd 
                 
                 # Active Sway Correction (User Request)

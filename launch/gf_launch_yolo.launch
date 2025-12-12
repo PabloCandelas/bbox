@@ -1,0 +1,25 @@
+<launch>
+    <arg name="model_path" default="bbox/best.pt"/>
+    <arg name="namespace" default="bluerov2"/>
+
+    <group> 
+        <push_ros_namespace namespace="$(var namespace)"/>
+
+        <!-- 1. Video Driver Node -->
+        <node pkg="bbox" exec="video" name="video" output="screen">
+        </node>     
+
+        <!-- 2. YOLO Detection Node -->
+        <node pkg="bbox" exec="bbox_yolo_detection" name="bbox_yolo_detection" output="screen">
+            <param name="model_path" value="$(var model_path)"/>
+            <param name="camera_topic" value="camera/image"/>
+            <param name="show_display" value="true"/>
+            <param name="conf_thres" value="0.5"/>
+            
+            <!-- Optional: Set initial target offset here if you know it, e.g. -->
+            <param name="target_offset_x" value="0"/>
+            <param name="target_offset_y" value="0"/>
+        </node>
+
+    </group>
+</launch>

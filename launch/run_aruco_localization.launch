@@ -20,11 +20,11 @@
         </node>
 
         <!-- 2. Localization Node -->
-        <!-- <node pkg="bbox" exec="aruco_localization" name="aruco_localization_node" output="screen">
+        <node pkg="bbox" exec="aruco_localization" name="aruco_localization_node" output="screen">
             <param name="camera_frame" value="camera_optical"/>
             <param name="base_frame" value="base_link"/>
             <param name="world_frame" value="map"/>
-        </node> -->
+        </node>
 
     </group>
 </launch>
