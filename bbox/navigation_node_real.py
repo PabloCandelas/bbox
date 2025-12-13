@@ -1,28 +1,22 @@
 #!/usr/bin/env python3
 """
-navigation_node_real_v5.py - ALIGNED STRAIGHT-LINE Approach
-============================================================
+navigation_node_real_v6.py - PID-CONTROLLED Straight-Line Approach
+===================================================================
 
-KEY REQUIREMENTS:
+KEY IMPROVEMENTS:
 -----------------
-1. Keep BOX center and HANDLE center aligned horizontally
-2. Approach steadily in a STRAIGHT LINE (no oscillation)
-3. If lose BOX but still see HANDLE → continue gentle approach
-4. When HANDLE fills screen → we're close enough, HOLD
+1. PID CONTROLLERS for yaw and heave (not just P)
+   - Derivative term dampens oscillations
+   - Integral term eliminates steady-state error
+2. FASTER APPROACH - increased surge speeds
+3. BETTER HANDLE TRACKING - corrections during approach
+4. HANDLE FILLS SCREEN - clear stopping condition
 
 STRATEGY:
 ---------
-Phase 1: ALIGN - Get handle centered, verify we're facing handle-face
-Phase 2: APPROACH - Steady straight-line approach, small corrections only
-Phase 3: FINAL - Handle fills screen, hold position for gripper
-
-FIXES FROM v4:
---------------
-1. MUCH HIGHER YAW GAIN when error is large (was stuck at err=-154)
-2. Progressive gain: small errors = small corrections, large errors = fast correction
-3. Alignment verification: ensure handle is near box center (not viewing from side)
-4. Handle-fills-screen detection for final approach
-5. Straight-line lock: once centered, minimal yaw corrections
+Phase 1: ALIGN - PID control to center handle (no forward movement)
+Phase 2: APPROACH - Steady forward, PID corrections, straight line
+Phase 3: FINAL - Handle fills screen → stop for gripper attachment
 """
 
 import rclpy
@@ -66,54 +60,114 @@ class Detection:
 class MissionMode(Enum):
     MANUAL = 0
     SEARCH = 1
-    ALIGN_TO_HANDLE = 2      # Phase 1: Get centered on handle
-    APPROACH_STRAIGHT = 3    # Phase 2: Straight-line approach
-    FINAL_APPROACH = 4       # Phase 3: Handle fills screen, very close
+    ALIGN_TO_HANDLE = 2
+    APPROACH_STRAIGHT = 3
+    FINAL_APPROACH = 4
     HOLD_POSITION = 5
     BACKUP = 6
 
 
-class ErrorFilter:
-    """Smooths error signals"""
+class PIDController:
+    """
+    PID Controller with anti-windup and derivative filtering.
     
-    def __init__(self, window_size: int = 3):
-        self.window_size = window_size
-        self.error_x_history = deque(maxlen=window_size)
-        self.error_y_history = deque(maxlen=window_size)
+    The derivative term is crucial for damping oscillations!
+    """
     
-    def update(self, error_x: float, error_y: float) -> tuple:
-        self.error_x_history.append(error_x)
-        self.error_y_history.append(error_y)
+    def __init__(self, kp: float, ki: float, kd: float, 
+                 output_limit: float = 1.0,
+                 integral_limit: float = 100.0,
+                 derivative_filter: float = 0.1):
+        self.kp = kp
+        self.ki = ki
+        self.kd = kd
+        self.output_limit = output_limit
+        self.integral_limit = integral_limit
+        self.derivative_filter = derivative_filter  # Low-pass filter for derivative
         
-        if len(self.error_x_history) == 0:
-            return error_x, error_y
-        
-        smooth_x = sum(self.error_x_history) / len(self.error_x_history)
-        smooth_y = sum(self.error_y_history) / len(self.error_y_history)
-        
-        return smooth_x, smooth_y
+        self.integral = 0.0
+        self.prev_error = 0.0
+        self.prev_derivative = 0.0
+        self.last_time = None
     
     def reset(self):
-        self.error_x_history.clear()
-        self.error_y_history.clear()
+        """Reset controller state"""
+        self.integral = 0.0
+        self.prev_error = 0.0
+        self.prev_derivative = 0.0
+        self.last_time = None
+    
+    def compute(self, error: float, current_time: float = None) -> float:
+        """
+        Compute PID output.
+        
+        Args:
+            error: Current error (setpoint - measured)
+            current_time: Current timestamp (uses time.time() if None)
+        
+        Returns:
+            Control output (limited to output_limit)
+        """
+        if current_time is None:
+            current_time = time.time()
+        
+        # Calculate dt
+        if self.last_time is None:
+            dt = 0.05  # Default 20Hz
+        else:
+            dt = current_time - self.last_time
+            dt = max(dt, 0.001)  # Prevent division by zero
+        
+        self.last_time = current_time
+        
+        # Proportional term
+        p_term = self.kp * error
+        
+        # Integral term with anti-windup
+        self.integral += error * dt
+        self.integral = np.clip(self.integral, -self.integral_limit, self.integral_limit)
+        i_term = self.ki * self.integral
+        
+        # Derivative term with low-pass filter (reduces noise)
+        raw_derivative = (error - self.prev_error) / dt
+        # Filter: new = alpha * raw + (1-alpha) * old
+        derivative = (self.derivative_filter * raw_derivative + 
+                     (1 - self.derivative_filter) * self.prev_derivative)
+        self.prev_derivative = derivative
+        d_term = self.kd * derivative
+        
+        self.prev_error = error
+        
+        # Total output
+        output = p_term + i_term + d_term
+        
+        # Limit output
+        output = np.clip(output, -self.output_limit, self.output_limit)
+        
+        return output
+    
+    def set_gains(self, kp: float, ki: float, kd: float):
+        """Update PID gains"""
+        self.kp = kp
+        self.ki = ki
+        self.kd = kd
 
 
 class NavigationNodeReal(Node):
     """
-    ALIGNED STRAIGHT-LINE Approach Navigation
-    
-    Key: Keep handle centered, approach in straight line, handle screen-fill detection
+    PID-Controlled Straight-Line Approach Navigation
     """
     
     def __init__(self):
         super().__init__('navigation_node_real')
         
         self.get_logger().info("=" * 60)
-        self.get_logger().info("Navigation Node v5 - ALIGNED STRAIGHT-LINE")
-        self.get_logger().info("  Strategy: Align → Approach straight → Final approach")
+        self.get_logger().info("Navigation Node v6 - PID CONTROLLED")
+        self.get_logger().info("  Strategy: PID align → Straight approach → Stop at target")
         self.get_logger().info("=" * 60)
         
         self._declare_parameters()
+        self._init_controllers()
         self._init_state()
         self._init_ros()
         self._print_startup_info()
@@ -122,22 +176,35 @@ class NavigationNodeReal(Node):
         self.declare_parameter('control_rate', 20.0)
         
         # === SPEED LIMITS ===
-        self.declare_parameter('max_surge', 0.15)        # Steady approach speed
-        self.declare_parameter('max_heave', 0.20)
-        self.declare_parameter('max_yaw_rate', 0.25)     # INCREASED for faster alignment
+        self.declare_parameter('max_surge', 0.18)
+        self.declare_parameter('max_heave', 0.25)
+        self.declare_parameter('max_yaw_rate', 0.20)
         self.declare_parameter('backup_speed', 0.10)
-        self.declare_parameter('final_approach_speed', 0.05)  # Very slow final
+        self.declare_parameter('final_approach_speed', 0.08)
         
-        # === VISUAL SERVOING GAINS ===
-        # Progressive gains - higher when error is large
-        self.declare_parameter('vs_gain_yaw_base', 0.0012)    # INCREASED base gain
-        self.declare_parameter('vs_gain_yaw_boost', 0.0008)   # Extra gain for large errors
-        self.declare_parameter('vs_gain_heave', 0.002)
+        # === PID GAINS FOR YAW ===
+        # Kp: Proportional - how hard to correct
+        # Ki: Integral - eliminates steady-state error  
+        # Kd: Derivative - dampens oscillations (CRITICAL!)
+        self.declare_parameter('yaw_kp', 0.0015)
+        self.declare_parameter('yaw_ki', 0.0001)
+        self.declare_parameter('yaw_kd', 0.002)  # Important for damping!
         
-        # Error threshold for boost
-        self.declare_parameter('large_error_threshold', 100.0)  # Pixels
+        # === PID GAINS FOR HEAVE ===
+        self.declare_parameter('heave_kp', 0.003)
+        self.declare_parameter('heave_ki', 0.0002)
+        self.declare_parameter('heave_kd', 0.004)  # Important for damping!
         
-        # Sign inversion (adjust if robot turns wrong way)
+        # === APPROACH PHASE GAINS (lower for stability) ===
+        self.declare_parameter('approach_yaw_kp', 0.0008)
+        self.declare_parameter('approach_yaw_ki', 0.00005)
+        self.declare_parameter('approach_yaw_kd', 0.001)
+        
+        self.declare_parameter('approach_heave_kp', 0.002)
+        self.declare_parameter('approach_heave_ki', 0.0001)
+        self.declare_parameter('approach_heave_kd', 0.002)
+        
+        # Sign inversion
         self.declare_parameter('yaw_sign', -1.0)
         self.declare_parameter('heave_sign', -1.0)
         
@@ -155,35 +222,71 @@ class NavigationNodeReal(Node):
         self.declare_parameter('image_height', 1080.0)
         
         # === CENTERING TOLERANCES ===
-        self.declare_parameter('align_tolerance_x', 80.0)    # Tighter for alignment phase
-        self.declare_parameter('align_tolerance_y', 100.0)
-        self.declare_parameter('approach_tolerance_x', 120.0)  # Slightly looser during approach
-        self.declare_parameter('approach_tolerance_y', 140.0)
+        self.declare_parameter('align_tolerance_x', 60.0)
+        self.declare_parameter('align_tolerance_y', 80.0)
+        self.declare_parameter('approach_tolerance_x', 100.0)
+        self.declare_parameter('approach_tolerance_y', 120.0)
         
         # === STABILITY ===
-        self.declare_parameter('stability_count_required', 10)  # More frames for stable alignment
+        self.declare_parameter('stability_count_required', 15)  # More frames for PID to settle
         
         # === HANDLE SIZE THRESHOLDS ===
-        # Handle area relative to image for phase transitions
-        self.declare_parameter('handle_area_for_approach', 5000.0)   # Start approach
-        self.declare_parameter('handle_area_for_final', 20000.0)     # Very close
-        self.declare_parameter('handle_fills_screen_ratio', 0.15)    # 15% of image = filled
+        self.declare_parameter('handle_area_start', 3000.0)      # Min area to start approach
+        self.declare_parameter('handle_area_close', 30000.0)     # Getting close
+        self.declare_parameter('handle_area_final', 60000.0)     # Final approach
+        self.declare_parameter('handle_area_stop', 100000.0)     # STOP - ready for gripper
+        
+        # Screen fill percentages
+        self.declare_parameter('handle_fill_final', 0.04)   # 4% = start final approach
+        self.declare_parameter('handle_fill_stop', 0.08)    # 8% = stop completely
         
         # === BOX THRESHOLDS ===
-        self.declare_parameter('box_close_area', 80000.0)
-        self.declare_parameter('box_too_close_area', 400000.0)  # Back up if larger
-        
-        # === ALIGNMENT CHECK ===
-        # Handle should be roughly centered on box (not viewing from side)
-        self.declare_parameter('handle_box_offset_tolerance', 200.0)  # Max X offset between centers
+        self.declare_parameter('box_too_close_area', 500000.0)
         
         # === TIMEOUTS ===
         self.declare_parameter('max_approach_time', 120.0)
         self.declare_parameter('safety_timeout', 5.0)
-        self.declare_parameter('align_timeout', 30.0)  # Max time to align
+        self.declare_parameter('align_timeout', 45.0)
+    
+    def _init_controllers(self):
+        """Initialize PID controllers"""
+        # Alignment phase controllers (higher gains for faster response)
+        self._yaw_pid_align = PIDController(
+            kp=self.get_parameter('yaw_kp').value,
+            ki=self.get_parameter('yaw_ki').value,
+            kd=self.get_parameter('yaw_kd').value,
+            output_limit=self.get_parameter('max_yaw_rate').value,
+            integral_limit=200.0,
+            derivative_filter=0.2
+        )
         
-        # === STRAIGHT LINE APPROACH ===
-        self.declare_parameter('straight_line_yaw_limit', 0.05)  # Max yaw during straight approach
+        self._heave_pid_align = PIDController(
+            kp=self.get_parameter('heave_kp').value,
+            ki=self.get_parameter('heave_ki').value,
+            kd=self.get_parameter('heave_kd').value,
+            output_limit=self.get_parameter('max_heave').value,
+            integral_limit=150.0,
+            derivative_filter=0.2
+        )
+        
+        # Approach phase controllers (lower gains for stability)
+        self._yaw_pid_approach = PIDController(
+            kp=self.get_parameter('approach_yaw_kp').value,
+            ki=self.get_parameter('approach_yaw_ki').value,
+            kd=self.get_parameter('approach_yaw_kd').value,
+            output_limit=self.get_parameter('max_yaw_rate').value * 0.6,
+            integral_limit=100.0,
+            derivative_filter=0.3
+        )
+        
+        self._heave_pid_approach = PIDController(
+            kp=self.get_parameter('approach_heave_kp').value,
+            ki=self.get_parameter('approach_heave_ki').value,
+            kd=self.get_parameter('approach_heave_kd').value,
+            output_limit=self.get_parameter('max_heave').value * 0.8,
+            integral_limit=100.0,
+            derivative_filter=0.3
+        )
     
     def _init_state(self):
         self._mode = MissionMode.MANUAL
@@ -210,17 +313,18 @@ class NavigationNodeReal(Node):
         
         # Stability
         self._centered_count = 0
-        self._aligned = False  # True when properly aligned to handle
-        
-        # Error filtering
-        self._handle_error_filter = ErrorFilter(window_size=3)
+        self._aligned = False
         
         # Backup state
         self._backup_start_time = None
         
-        # Last known handle error (for when handle is lost briefly)
+        # Last known handle error
         self._last_handle_error_x = 0.0
         self._last_handle_error_y = 0.0
+        
+        # For logging PID internals
+        self._last_yaw_p = 0.0
+        self._last_yaw_d = 0.0
     
     def _init_ros(self):
         self.pub_cmd_vel = self.create_publisher(Twist, '/bluerov2/cmd_vel', 10)
@@ -259,14 +363,15 @@ class NavigationNodeReal(Node):
     
     def _print_startup_info(self):
         self.get_logger().info("")
-        self.get_logger().info("v5 STRATEGY:")
-        self.get_logger().info("  1. ALIGN: Center on handle, verify facing handle-face")
-        self.get_logger().info("  2. APPROACH: Steady straight-line, minimal corrections")
-        self.get_logger().info("  3. FINAL: Handle fills screen → hold for gripper")
+        self.get_logger().info("v6 FEATURES:")
+        self.get_logger().info("  - PID controllers (not just P!)")
+        self.get_logger().info("  - Derivative term dampens oscillations")
+        self.get_logger().info("  - Integral term eliminates steady-state error")
+        self.get_logger().info("  - Separate gains for ALIGN vs APPROACH phases")
         self.get_logger().info("")
-        self.get_logger().info("  - If lose BOX but see HANDLE → continue gently")
-        self.get_logger().info("  - Higher yaw gain for faster alignment")
-        self.get_logger().info("  - Straight-line lock during approach phase")
+        self.get_logger().info("PID GAINS:")
+        self.get_logger().info(f"  Yaw (align):  Kp={self._yaw_pid_align.kp}, Ki={self._yaw_pid_align.ki}, Kd={self._yaw_pid_align.kd}")
+        self.get_logger().info(f"  Heave (align): Kp={self._heave_pid_align.kp}, Ki={self._heave_pid_align.ki}, Kd={self._heave_pid_align.kd}")
         self.get_logger().info("")
         self.get_logger().info("CONTROLS: Y=Manual, X=Auto, A=Hold, B=Manual")
         self.get_logger().info("=" * 60)
@@ -308,7 +413,6 @@ class NavigationNodeReal(Node):
         self._handle_detection.timestamp = now
         self._last_handle_time = now
         
-        # Store last known error
         self._last_handle_error_x = msg.x
         self._last_handle_error_y = msg.y
     
@@ -365,16 +469,13 @@ class NavigationNodeReal(Node):
                 return self._handle_detection
         return None
     
-    def _handle_fills_screen(self, handle: Detection) -> bool:
-        """Check if handle fills significant portion of screen"""
+    def _get_handle_fill_ratio(self, handle: Detection) -> float:
+        """Get handle area as fraction of image"""
         img_width = self.get_parameter('image_width').value
         img_height = self.get_parameter('image_height').value
-        fill_ratio = self.get_parameter('handle_fills_screen_ratio').value
-        
         image_area = img_width * img_height
         handle_area = handle.width * handle.height
-        
-        return (handle_area / image_area) > fill_ratio
+        return handle_area / image_area
     
     # =========================================================================
     # MAIN CONTROL LOOP
@@ -413,25 +514,26 @@ class NavigationNodeReal(Node):
         self._last_cmd_time = now
     
     # =========================================================================
-    # PHASE 1: ALIGN TO HANDLE
+    # PHASE 1: ALIGN TO HANDLE (PID CONTROLLED)
     # =========================================================================
     
     def _do_align(self, buoyancy: float) -> Twist:
         """
-        ALIGN phase: Get handle centered before approaching.
-        Uses higher yaw gain for faster alignment.
+        ALIGN phase with PID control.
+        Centers handle in view before approaching.
         """
         cmd = Twist()
         cmd.linear.z = buoyancy
         
         now = time.time()
         
-        # Initialize align timer
+        # Initialize
         if self._align_start_time is None:
             self._align_start_time = now
-            self._handle_error_filter.reset()
+            self._yaw_pid_align.reset()
+            self._heave_pid_align.reset()
             self._centered_count = 0
-            self.get_logger().info("Starting ALIGN phase...")
+            self.get_logger().info("Starting ALIGN phase with PID control...")
         
         # Timeout check
         align_timeout = self.get_parameter('align_timeout').value
@@ -445,47 +547,24 @@ class NavigationNodeReal(Node):
         
         if not handle:
             if box:
-                # Have box but no handle - search for handle
                 self.get_logger().info("No handle during ALIGN - searching...")
-                cmd.angular.z = 0.08  # Slow rotation to find handle
+                cmd.angular.z = 0.08
                 self._centered_count = 0
+                self._yaw_pid_align.reset()
                 return cmd
             else:
-                self.get_logger().warn("Lost both box and handle - HOLD")
+                self.get_logger().warn("Lost both - HOLD")
                 self.set_mode(MissionMode.HOLD_POSITION)
                 return cmd
         
-        # Check if handle fills screen (already very close!)
-        if self._handle_fills_screen(handle):
-            self.get_logger().info("=" * 50)
-            self.get_logger().info(">>> HANDLE FILLS SCREEN - FINAL APPROACH <<<")
-            self.get_logger().info("=" * 50)
-            self.set_mode(MissionMode.FINAL_APPROACH)
-            return self._do_final_approach(buoyancy)
-        
-        # Check box alignment (are we viewing from correct face?)
-        if box:
-            handle_box_offset = abs(handle.center_x - box.center_x)
-            offset_tolerance = self.get_parameter('handle_box_offset_tolerance').value
-            
-            if handle_box_offset > offset_tolerance:
-                if self._control_count % 20 == 0:
-                    self.get_logger().warn(
-                        f"Handle-Box misaligned: offset={handle_box_offset:.0f}px "
-                        f"(tolerance={offset_tolerance:.0f})"
-                    )
-                # TODO: Could add logic to reposition if viewing from wrong side
-        
-        # Calculate errors
+        # Calculate errors (target = image center)
         center_x = self.get_parameter('image_center_x').value
         center_y = self.get_parameter('image_center_y').value
         
-        raw_error_x = handle.center_x - center_x
-        raw_error_y = handle.center_y - center_y
+        error_x = handle.center_x - center_x
+        error_y = handle.center_y - center_y
         
-        error_x, error_y = self._handle_error_filter.update(raw_error_x, raw_error_y)
-        
-        # Get tolerances for alignment
+        # Get tolerances
         tol_x = self.get_parameter('align_tolerance_x').value
         tol_y = self.get_parameter('align_tolerance_y').value
         
@@ -496,37 +575,20 @@ class NavigationNodeReal(Node):
         if is_centered:
             self._centered_count += 1
         else:
-            self._centered_count = 0
+            self._centered_count = max(0, self._centered_count - 1)  # Decay slowly
         
-        # PROGRESSIVE YAW GAIN - faster correction for large errors
-        gain_yaw_base = self.get_parameter('vs_gain_yaw_base').value
-        gain_yaw_boost = self.get_parameter('vs_gain_yaw_boost').value
-        large_error_thresh = self.get_parameter('large_error_threshold').value
-        
-        # Apply boost for large errors
-        if abs(error_x) > large_error_thresh:
-            gain_yaw = gain_yaw_base + gain_yaw_boost
-        else:
-            gain_yaw = gain_yaw_base
-        
-        gain_heave = self.get_parameter('vs_gain_heave').value
-        max_yaw = self.get_parameter('max_yaw_rate').value
-        max_heave = self.get_parameter('max_heave').value
+        # PID control
         yaw_sign = self.get_parameter('yaw_sign').value
         heave_sign = self.get_parameter('heave_sign').value
         
-        # Calculate commands
-        yaw_cmd = yaw_sign * gain_yaw * error_x
-        yaw_cmd = np.clip(yaw_cmd, -max_yaw, max_yaw)
-        
-        heave_cmd = heave_sign * gain_heave * error_y
-        heave_cmd = np.clip(heave_cmd, -max_heave, max_heave)
+        yaw_cmd = yaw_sign * self._yaw_pid_align.compute(error_x, now)
+        heave_cmd = heave_sign * self._heave_pid_align.compute(error_y, now)
         
         cmd.angular.z = yaw_cmd
         cmd.linear.z = buoyancy + heave_cmd
-        cmd.linear.x = 0.0  # NO forward movement during align
+        cmd.linear.x = 0.0  # No forward movement during align
         
-        # Check if stable enough to transition to approach
+        # Check if stable enough
         stability_required = self.get_parameter('stability_count_required').value
         
         if self._centered_count >= stability_required:
@@ -535,6 +597,8 @@ class NavigationNodeReal(Node):
             self.get_logger().info("=" * 50)
             self._aligned = True
             self._approach_start_time = time.time()
+            self._yaw_pid_approach.reset()
+            self._heave_pid_approach.reset()
             self.set_mode(MissionMode.APPROACH_STRAIGHT)
             return cmd
         
@@ -542,26 +606,24 @@ class NavigationNodeReal(Node):
         if self._control_count % 10 == 0:
             cx = "✓" if is_centered_x else " "
             cy = "✓" if is_centered_y else " "
+            handle_area = handle.width * handle.height
             
             self.get_logger().info(
                 f"ALIGN [{cx}{cy}] err=({error_x:+.0f},{error_y:+.0f}) "
-                f"yaw={yaw_cmd:+.3f} gain={gain_yaw:.4f} | "
-                f"center:{self._centered_count}/{stability_required}"
+                f"yaw={yaw_cmd:+.3f} heave={heave_cmd:+.3f} | "
+                f"stable:{self._centered_count}/{stability_required} area={handle_area:.0f}"
             )
         
         return cmd
     
     # =========================================================================
-    # PHASE 2: STRAIGHT-LINE APPROACH
+    # PHASE 2: STRAIGHT-LINE APPROACH (PID + FORWARD)
     # =========================================================================
     
     def _do_approach_straight(self, buoyancy: float) -> Twist:
         """
-        STRAIGHT APPROACH phase: 
-        - Steady forward movement
-        - Minimal yaw corrections (capped)
-        - If lose box but see handle → continue gently
-        - If handle fills screen → final approach
+        STRAIGHT APPROACH with PID corrections.
+        Continues even if box is lost (as long as handle visible).
         """
         cmd = Twist()
         cmd.linear.z = buoyancy
@@ -571,38 +633,37 @@ class NavigationNodeReal(Node):
         handle = self._get_handle_detection()
         box = self._get_box_detection()
         
-        # Priority: Handle detection
         if not handle:
-            # Lost handle
             if box:
-                # Have box but lost handle - back up to regain view
                 box_area = box.width * box.height
                 box_too_close = self.get_parameter('box_too_close_area').value
                 
                 if box_area > box_too_close:
                     self.get_logger().info("Lost handle, box too close - backing up...")
                     self.set_mode(MissionMode.BACKUP)
-                    return self._do_backup(buoyancy)
+                    return cmd
                 else:
-                    # Box visible but not huge - realign
                     self.get_logger().info("Lost handle - returning to ALIGN")
                     self._aligned = False
                     self._align_start_time = None
                     self.set_mode(MissionMode.ALIGN_TO_HANDLE)
                     return cmd
             else:
-                # Lost both - hold
-                self.get_logger().warn("Lost handle and box - HOLD")
+                self.get_logger().warn("Lost both - HOLD")
                 self.set_mode(MissionMode.HOLD_POSITION)
                 return cmd
         
-        # Handle is visible!
+        # Handle visible - check size
         handle_area = handle.width * handle.height
+        fill_ratio = self._get_handle_fill_ratio(handle)
         
-        # Check if handle fills screen
-        if self._handle_fills_screen(handle):
+        fill_final = self.get_parameter('handle_fill_final').value
+        fill_stop = self.get_parameter('handle_fill_stop').value
+        
+        # Check for final approach
+        if fill_ratio > fill_final:
             self.get_logger().info("=" * 50)
-            self.get_logger().info(">>> HANDLE FILLS SCREEN - FINAL APPROACH <<<")
+            self.get_logger().info(f">>> HANDLE CLOSE (fill={fill_ratio*100:.1f}%) - FINAL APPROACH <<<")
             self.get_logger().info("=" * 50)
             self.set_mode(MissionMode.FINAL_APPROACH)
             return self._do_final_approach(buoyancy)
@@ -611,83 +672,56 @@ class NavigationNodeReal(Node):
         center_x = self.get_parameter('image_center_x').value
         center_y = self.get_parameter('image_center_y').value
         
-        raw_error_x = handle.center_x - center_x
-        raw_error_y = handle.center_y - center_y
+        error_x = handle.center_x - center_x
+        error_y = handle.center_y - center_y
         
-        error_x, error_y = self._handle_error_filter.update(raw_error_x, raw_error_y)
+        # PID control (approach gains - lower)
+        yaw_sign = self.get_parameter('yaw_sign').value
+        heave_sign = self.get_parameter('heave_sign').value
         
-        # Get approach tolerances (slightly looser than align)
+        yaw_cmd = yaw_sign * self._yaw_pid_approach.compute(error_x, now)
+        heave_cmd = heave_sign * self._heave_pid_approach.compute(error_y, now)
+        
+        # Get tolerances
         tol_x = self.get_parameter('approach_tolerance_x').value
         tol_y = self.get_parameter('approach_tolerance_y').value
         
         is_centered_x = abs(error_x) < tol_x
         is_centered_y = abs(error_y) < tol_y
         
-        # Gains
-        gain_yaw_base = self.get_parameter('vs_gain_yaw_base').value
-        gain_heave = self.get_parameter('vs_gain_heave').value
-        max_heave = self.get_parameter('max_heave').value
-        yaw_sign = self.get_parameter('yaw_sign').value
-        heave_sign = self.get_parameter('heave_sign').value
-        
-        # STRAIGHT LINE: Cap yaw to prevent oscillation
-        straight_yaw_limit = self.get_parameter('straight_line_yaw_limit').value
-        
-        yaw_cmd = yaw_sign * gain_yaw_base * error_x
-        yaw_cmd = np.clip(yaw_cmd, -straight_yaw_limit, straight_yaw_limit)
-        
-        heave_cmd = heave_sign * gain_heave * error_y
-        heave_cmd = np.clip(heave_cmd, -max_heave, max_heave)
-        
-        # SURGE: Steady forward, reduce if too off-center
+        # SURGE - faster when centered, slower when off
         max_surge = self.get_parameter('max_surge').value
         
-        # Calculate target area
-        handle_final_area = self.get_parameter('handle_area_for_final').value
-        area_ratio = handle_area / handle_final_area
-        
         if is_centered_x and is_centered_y:
-            # Well centered - full speed
-            if area_ratio < 0.3:
-                surge_cmd = max_surge
-            elif area_ratio < 0.6:
-                surge_cmd = max_surge * 0.8
-            elif area_ratio < 0.9:
-                surge_cmd = max_surge * 0.6
-            else:
-                surge_cmd = max_surge * 0.4
+            surge_cmd = max_surge  # Full speed when centered
+        elif is_centered_x or is_centered_y:
+            surge_cmd = max_surge * 0.7  # Reduce if partially off
         else:
-            # Off-center - reduce speed, prioritize centering
-            surge_cmd = max_surge * 0.3
+            surge_cmd = max_surge * 0.4  # Slow if both off, prioritize centering
         
-        # If very off-center, go back to align
-        if abs(error_x) > tol_x * 2 or abs(error_y) > tol_y * 2:
-            self.get_logger().info("Drifted off-center - returning to ALIGN")
-            self._aligned = False
-            self._align_start_time = None
-            self.set_mode(MissionMode.ALIGN_TO_HANDLE)
-            return cmd
+        # Scale surge based on handle size (slow down as we get closer)
+        area_close = self.get_parameter('handle_area_close').value
+        if handle_area > area_close:
+            surge_scale = max(0.5, 1.0 - (handle_area - area_close) / area_close)
+            surge_cmd *= surge_scale
         
         cmd.angular.z = yaw_cmd
         cmd.linear.z = buoyancy + heave_cmd
         cmd.linear.x = surge_cmd
         
-        # Check if box is gone but handle visible (we're very close)
-        handle_only_str = ""
-        if not box and handle:
-            handle_only_str = " [HANDLE-ONLY]"
+        # Status
+        handle_only = not box
+        handle_only_str = " [HANDLE-ONLY]" if handle_only else ""
         
-        # Logging
         if self._control_count % 10 == 0:
             cx = "✓" if is_centered_x else " "
             cy = "✓" if is_centered_y else " "
-            
             elapsed = now - self._approach_start_time if self._approach_start_time else 0
             
             self.get_logger().info(
                 f"APPROACH [{cx}{cy}] err=({error_x:+.0f},{error_y:+.0f}) "
                 f"surge={surge_cmd:.2f} yaw={yaw_cmd:+.3f}{handle_only_str} | "
-                f"hdl_area={handle_area:.0f} T={elapsed:.0f}s"
+                f"fill={fill_ratio*100:.1f}% T={elapsed:.0f}s"
             )
         
         return cmd
@@ -698,11 +732,13 @@ class NavigationNodeReal(Node):
     
     def _do_final_approach(self, buoyancy: float) -> Twist:
         """
-        FINAL APPROACH: Handle fills most of screen.
-        Very slow, careful movement. Ready for gripper.
+        FINAL APPROACH: Handle fills significant portion of screen.
+        Very slow, careful. Stop when fill ratio exceeds threshold.
         """
         cmd = Twist()
         cmd.linear.z = buoyancy
+        
+        now = time.time()
         
         handle = self._get_handle_detection()
         
@@ -711,39 +747,48 @@ class NavigationNodeReal(Node):
             self.set_mode(MissionMode.HOLD_POSITION)
             return cmd
         
-        # Calculate errors
+        # Calculate fill ratio
+        fill_ratio = self._get_handle_fill_ratio(handle)
+        fill_stop = self.get_parameter('handle_fill_stop').value
+        
+        # Check if should stop
+        if fill_ratio > fill_stop:
+            if self._control_count % 20 == 0:
+                self.get_logger().info(f">>> HANDLE FILLS SCREEN ({fill_ratio*100:.1f}%) - HOLDING FOR GRIPPER <<<")
+            
+            # Hold position - tiny corrections only
+            center_x = self.get_parameter('image_center_x').value
+            center_y = self.get_parameter('image_center_y').value
+            error_x = handle.center_x - center_x
+            error_y = handle.center_y - center_y
+            
+            yaw_sign = self.get_parameter('yaw_sign').value
+            heave_sign = self.get_parameter('heave_sign').value
+            
+            cmd.angular.z = yaw_sign * 0.0003 * error_x  # Tiny corrections
+            cmd.linear.z = buoyancy + heave_sign * 0.0005 * error_y
+            cmd.linear.x = 0.0  # STOP
+            
+            return cmd
+        
+        # Not at stop threshold - continue slowly
         center_x = self.get_parameter('image_center_x').value
         center_y = self.get_parameter('image_center_y').value
-        
         error_x = handle.center_x - center_x
         error_y = handle.center_y - center_y
         
-        # Very gentle corrections
-        gain_yaw = self.get_parameter('vs_gain_yaw_base').value * 0.5
-        gain_heave = self.get_parameter('vs_gain_heave').value * 0.5
         yaw_sign = self.get_parameter('yaw_sign').value
         heave_sign = self.get_parameter('heave_sign').value
         
-        yaw_cmd = yaw_sign * gain_yaw * error_x
-        yaw_cmd = np.clip(yaw_cmd, -0.03, 0.03)  # Very limited
+        # Use approach PID but with reduced output
+        yaw_cmd = yaw_sign * self._yaw_pid_approach.compute(error_x, now) * 0.5
+        heave_cmd = heave_sign * self._heave_pid_approach.compute(error_y, now) * 0.5
         
-        heave_cmd = heave_sign * gain_heave * error_y
-        heave_cmd = np.clip(heave_cmd, -0.1, 0.1)
-        
-        # Very slow forward or stop
         final_speed = self.get_parameter('final_approach_speed').value
         
-        handle_area = handle.width * handle.height
-        img_area = self.get_parameter('image_width').value * self.get_parameter('image_height').value
-        fill_ratio = handle_area / img_area
-        
-        if fill_ratio > 0.25:
-            # Handle is huge - stop!
-            surge_cmd = 0.0
-            if self._control_count % 20 == 0:
-                self.get_logger().info(">>> HANDLE VERY CLOSE - HOLDING FOR GRIPPER <<<")
-        else:
-            surge_cmd = final_speed
+        # Scale speed based on how close to stop threshold
+        speed_scale = max(0.3, 1.0 - (fill_ratio / fill_stop))
+        surge_cmd = final_speed * speed_scale
         
         cmd.angular.z = yaw_cmd
         cmd.linear.z = buoyancy + heave_cmd
@@ -752,7 +797,7 @@ class NavigationNodeReal(Node):
         if self._control_count % 10 == 0:
             self.get_logger().info(
                 f"FINAL err=({error_x:+.0f},{error_y:+.0f}) "
-                f"surge={surge_cmd:.2f} fill={fill_ratio*100:.1f}%"
+                f"surge={surge_cmd:.3f} fill={fill_ratio*100:.1f}%/{fill_stop*100:.0f}%"
             )
         
         return cmd
@@ -771,12 +816,11 @@ class NavigationNodeReal(Node):
             self._backup_start_time = now
             self.get_logger().info(">>> BACKING UP <<<")
         
-        backup_duration = 2.0  # seconds
+        backup_duration = 2.5
         elapsed = now - self._backup_start_time
         
-        # Check if handle reappeared
         handle = self._get_handle_detection()
-        if handle and elapsed > 0.5:  # Give it at least 0.5s
+        if handle and elapsed > 0.5:
             self.get_logger().info("Handle found while backing up - realigning")
             self._backup_start_time = None
             self._aligned = False
@@ -792,7 +836,7 @@ class NavigationNodeReal(Node):
             self.set_mode(MissionMode.ALIGN_TO_HANDLE)
             return cmd
         
-        # Back up while staying centered on box if visible
+        # Back up while centering on box if visible
         box = self._get_box_detection()
         if box:
             center_x = self.get_parameter('image_center_x').value
@@ -802,11 +846,9 @@ class NavigationNodeReal(Node):
             
             yaw_sign = self.get_parameter('yaw_sign').value
             heave_sign = self.get_parameter('heave_sign').value
-            gain_yaw = self.get_parameter('vs_gain_yaw_base').value
-            gain_heave = self.get_parameter('vs_gain_heave').value
             
-            cmd.angular.z = yaw_sign * gain_yaw * error_x
-            cmd.linear.z = buoyancy + heave_sign * gain_heave * error_y
+            cmd.angular.z = yaw_sign * 0.0008 * error_x
+            cmd.linear.z = buoyancy + heave_sign * 0.002 * error_y
         
         cmd.linear.x = -self.get_parameter('backup_speed').value
         
@@ -853,7 +895,6 @@ class NavigationNodeReal(Node):
             self.set_mode(MissionMode.ALIGN_TO_HANDLE)
             return cmd
         
-        # Rotate to search
         cmd.angular.z = 0.10
         return cmd
     
@@ -885,7 +926,7 @@ class NavigationNodeReal(Node):
             self.get_logger().info("Y → MANUAL")
             self.set_mode(MissionMode.MANUAL)
         
-        if debounced(2):  # X - Start mission
+        if debounced(2):  # X
             handle = self._get_handle_detection()
             if handle:
                 self.get_logger().info("X → Handle visible, ALIGN")
@@ -941,12 +982,20 @@ class NavigationNodeReal(Node):
         if mode == MissionMode.HOLD_POSITION:
             self._centered_count = 0
             self._aligned = False
+            self._yaw_pid_align.reset()
+            self._heave_pid_align.reset()
+            self._yaw_pid_approach.reset()
+            self._heave_pid_approach.reset()
         elif mode == MissionMode.MANUAL:
             self._centered_count = 0
             self._aligned = False
             self._approach_start_time = None
             self._align_start_time = None
             self._backup_start_time = None
+            self._yaw_pid_align.reset()
+            self._heave_pid_align.reset()
+            self._yaw_pid_approach.reset()
+            self._heave_pid_approach.reset()
             self._send_stop_command()
     
     def _status_loop(self):
@@ -959,12 +1008,8 @@ class NavigationNodeReal(Node):
         if box:
             box_str += f"({box.width * box.height:.0f})"
         if handle:
-            handle_str += f"({handle.width * handle.height:.0f})"
-            
-            # Show fill percentage
-            img_area = self.get_parameter('image_width').value * self.get_parameter('image_height').value
-            fill = (handle.width * handle.height) / img_area * 100
-            handle_str += f"[{fill:.1f}%]"
+            fill = self._get_handle_fill_ratio(handle) * 100
+            handle_str += f"({handle.width * handle.height:.0f})[{fill:.1f}%]"
         
         aligned_str = "ALIGNED" if self._aligned else "NOT-ALIGNED"
         
