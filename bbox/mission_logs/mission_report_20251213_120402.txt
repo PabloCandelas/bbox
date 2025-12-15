@@ -1,0 +1,6 @@
+MISSION REPORT - START: 2025-12-13 12:04:02.408165
+--------------------------------------------------
+[12:04:03] [INFO] Sensors Connected. Starting Ground Checks.
+[12:04:03] [INFO] >>> GROUND CHECKS PASSED. <<<
+[12:04:03] [INFO] Waiting for Deployment. PRESS 'B' WHEN READY TO START.
+[12:04:39] [INFO] Mission Aborted.

@@ -1,0 +1,533 @@
+MISSION REPORT - START: 2025-12-13 12:56:45.417175
+--------------------------------------------------
+[12:56:46] [INFO] Sensors Connected. Starting Ground Checks.
+[12:56:46] [INFO] >>> GROUND CHECKS PASSED. <<<
+[12:56:46] [INFO] Waiting for Deployment. PRESS 'B' WHEN READY TO START.
+[12:59:10] [INFO] >>> MISSION START (User Button B). SEARCHING FOR BOX. <<<
+[12:59:13] [INFO] BOX DETECTED (Stable). Determining Orientation...
+[12:59:17] [INFO] >>> ORIENTATION LOCKED: Horizontal <<<
+[12:59:17] [INFO] Target Found. PRESS 'B' TO CONFIRM AND START APPROACH.
+[12:59:18] [INFO] USER CONFIRMED (Horizontal). Switching to Approach Mode.
+[12:59:18] [INFO] Phase 1: Going to approximate depth to initiate approach...
+[12:59:18] [INFO] Please HOLD BUTTON A to engage thrusters for Visual Servoing.
+[12:59:22] [INFO] SERVOING UPDATE: Phase 1: Going to approximate depth -4.65m (Curr: -2.74)
+[12:59:22] [INFO] SERVOING UPDATE: Phase 1: Going to approximate depth -4.65m (Curr: -2.75)
+[12:59:23] [INFO] SERVOING UPDATE: Phase 1: Going to approximate depth -4.65m (Curr: -2.76)
+[12:59:23] [INFO] SERVOING UPDATE: Phase 1: Going to approximate depth -4.65m (Curr: -2.77)
+[12:59:23] [INFO] SERVOING UPDATE: Phase 1: Going to approximate depth -4.65m (Curr: -2.81)
+[12:59:23] [INFO] SERVOING UPDATE: Phase 1: Going to approximate depth -4.65m (Curr: -2.84)
+[12:59:23] [INFO] SERVOING UPDATE: Phase 1: Going to approximate depth -4.65m (Curr: -2.89)
+[12:59:23] [INFO] SERVOING UPDATE: Phase 1: Going to approximate depth -4.65m (Curr: -2.94)
+[12:59:23] [INFO] SERVOING UPDATE: Phase 1: Going to approximate depth -4.65m (Curr: -2.99)
+[12:59:23] [INFO] SERVOING UPDATE: Phase 1: Going to approximate depth -4.65m (Curr: -3.05)
+[12:59:24] [INFO] SERVOING UPDATE: Phase 1: Going to approximate depth -4.65m (Curr: -3.10)
+[12:59:24] [INFO] SERVOING UPDATE: Phase 1: Going to approximate depth -4.65m (Curr: -3.16)
+[12:59:24] [INFO] SERVOING UPDATE: Phase 1: Going to approximate depth -4.65m (Curr: -3.23)
+[12:59:24] [INFO] SERVOING UPDATE: Phase 1: Going to approximate depth -4.65m (Curr: -3.29)
+[12:59:24] [INFO] SERVOING UPDATE: Phase 1: Going to approximate depth -4.65m (Curr: -3.35)
+[12:59:24] [INFO] SERVOING UPDATE: Phase 1: Going to approximate depth -4.65m (Curr: -3.41)
+[12:59:24] [INFO] SERVOING UPDATE: Phase 1: Going to approximate depth -4.65m (Curr: -3.47)
+[12:59:24] [INFO] SERVOING UPDATE: Phase 1: Going to approximate depth -4.65m (Curr: -3.54)
+[12:59:24] [INFO] SERVOING UPDATE: Phase 1: Going to approximate depth -4.65m (Curr: -3.60)
+[12:59:24] [INFO] SERVOING UPDATE: Phase 1: Going to approximate depth -4.65m (Curr: -3.66)
+[12:59:25] [INFO] SERVOING UPDATE: Phase 1: Going to approximate depth -4.65m (Curr: -3.71)
+[12:59:25] [INFO] SERVOING UPDATE: Phase 1: Going to approximate depth -4.65m (Curr: -3.77)
+[12:59:25] [INFO] SERVOING UPDATE: Phase 1: Going to approximate depth -4.65m (Curr: -3.83)
+[12:59:25] [INFO] SERVOING UPDATE: Phase 1: Going to approximate depth -4.65m (Curr: -3.88)
+[12:59:25] [INFO] SERVOING UPDATE: Phase 1: Going to approximate depth -4.65m (Curr: -3.94)
+[12:59:25] [INFO] SERVOING UPDATE: Phase 1: Going to approximate depth -4.65m (Curr: -3.99)
+[12:59:25] [INFO] SERVOING UPDATE: Phase 1: Going to approximate depth -4.65m (Curr: -4.04)
+[12:59:25] [INFO] SERVOING UPDATE: Phase 1: Going to approximate depth -4.65m (Curr: -4.09)
+[12:59:25] [INFO] SERVOING UPDATE: Phase 1: Going to approximate depth -4.65m (Curr: -4.14)
+[12:59:25] [INFO] SERVOING UPDATE: Phase 1: Going to approximate depth -4.65m (Curr: -4.18)
+[12:59:26] [INFO] SERVOING UPDATE: Phase 1: Going to approximate depth -4.65m (Curr: -4.22)
+[12:59:26] [INFO] SERVOING UPDATE: Phase 1: Going to approximate depth -4.65m (Curr: -4.25)
+[12:59:26] [INFO] SERVOING UPDATE: Phase 1: Going to approximate depth -4.65m (Curr: -4.29)
+[12:59:26] [INFO] SERVOING UPDATE: Phase 1: Going to approximate depth -4.65m (Curr: -4.32)
+[12:59:26] [INFO] SERVOING UPDATE: Phase 1: Going to approximate depth -4.65m (Curr: -4.34)
+[12:59:26] [INFO] SERVOING UPDATE: Phase 1: Going to approximate depth -4.65m (Curr: -4.37)
+[12:59:26] [INFO] SERVOING UPDATE: Phase 1: Going to approximate depth -4.65m (Curr: -4.39)
+[12:59:26] [INFO] SERVOING UPDATE: Phase 1: Going to approximate depth -4.65m (Curr: -4.41)
+[12:59:26] [INFO] SERVOING UPDATE: Phase 1: Going to approximate depth -4.65m (Curr: -4.43)
+[12:59:26] [INFO] SERVOING UPDATE: Phase 1: Going to approximate depth -4.65m (Curr: -4.45)
+[12:59:27] [INFO] SERVOING UPDATE: Phase 1: Going to approximate depth -4.65m (Curr: -4.46)
+[12:59:27] [INFO] SERVOING UPDATE: Phase 1: Going to approximate depth -4.65m (Curr: -4.48)
+[12:59:27] [INFO] SERVOING UPDATE: Phase 1: Going to approximate depth -4.65m (Curr: -4.49)
+[12:59:27] [INFO] SERVOING UPDATE: Phase 2: Aligning with BBox horizontally (Err: -128)
+[12:59:27] [INFO] SERVOING UPDATE: Phase 2: Aligning with BBox horizontally (Err: -130)
+[12:59:27] [INFO] SERVOING UPDATE: Phase 2: Aligning with BBox horizontally (Err: -132)
+[12:59:27] [INFO] SERVOING UPDATE: Phase 2: Aligning with BBox horizontally (Err: -134)
+[12:59:27] [INFO] SERVOING UPDATE: Phase 2: Aligning with BBox horizontally (Err: -135)
+[12:59:27] [INFO] SERVOING UPDATE: Phase 2: Aligning with BBox horizontally (Err: -130)
+[12:59:27] [INFO] SERVOING UPDATE: Phase 2: Aligning with BBox horizontally (Err: -92)
+[12:59:27] [INFO] SERVOING UPDATE: Phase 2: Aligning with BBox horizontally (Err: -76)
+[12:59:28] [INFO] SERVOING UPDATE: Phase 2: Aligning with BBox horizontally (Err: -69)
+[12:59:28] [INFO] SERVOING UPDATE: Phase 2: Aligning with BBox horizontally (Err: -65)
+[12:59:28] [INFO] SERVOING UPDATE: Phase 2: Aligning with BBox horizontally (Err: -62)
+[12:59:28] [INFO] SERVOING UPDATE: Phase 2: Aligning with BBox horizontally (Err: -59)
+[12:59:28] [INFO] SERVOING UPDATE: Phase 2: Aligning with BBox horizontally (Err: -56)
+[12:59:28] [INFO] SERVOING UPDATE: Phase 2: Aligning with BBox horizontally (Err: -57)
+[12:59:28] [INFO] SERVOING UPDATE: Phase 2: Aligning with BBox horizontally (Err: -59)
+[12:59:28] [INFO] SERVOING UPDATE: Phase 2: Aligning with BBox horizontally (Err: -67)
+[12:59:28] [INFO] SERVOING UPDATE: Phase 2: Aligning with BBox horizontally (Err: -75)
+[12:59:28] [INFO] SERVOING UPDATE: Phase 2: Aligning with BBox horizontally (Err: -78)
+[12:59:28] [INFO] SERVOING UPDATE: Phase 2: Aligning with BBox horizontally (Err: -87)
+[12:59:29] [INFO] SERVOING UPDATE: Phase 2: Aligning with BBox horizontally (Err: -94)
+[12:59:29] [INFO] SERVOING UPDATE: Phase 2: Aligning with BBox horizontally (Err: -96)
+[12:59:29] [INFO] SERVOING UPDATE: Phase 2: Aligning with BBox horizontally (Err: -101)
+[12:59:29] [INFO] SERVOING UPDATE: Phase 2: Aligning with BBox horizontally (Err: -102)
+[12:59:29] [INFO] SERVOING UPDATE: Phase 2: Aligning with BBox horizontally (Err: -105)
+[12:59:29] [INFO] SERVOING UPDATE: Phase 2: Aligning with BBox horizontally (Err: -104)
+[12:59:29] [INFO] SERVOING UPDATE: Phase 2: Aligning with BBox horizontally (Err: -106)
+[12:59:29] [INFO] SERVOING UPDATE: Phase 2: Aligning with BBox horizontally (Err: -108)
+[12:59:30] [INFO] SERVOING UPDATE: Phase 2: Aligning with BBox horizontally (Err: -109)
+[12:59:30] [INFO] SERVOING UPDATE: Phase 2: Aligning with BBox horizontally (Err: -110)
+[12:59:30] [INFO] SERVOING UPDATE: Phase 2: Aligning with BBox horizontally (Err: -113)
+[12:59:30] [INFO] SERVOING UPDATE: Phase 2: Aligning with BBox horizontally (Err: -114)
+[12:59:30] [INFO] SERVOING UPDATE: Phase 2: Aligning with BBox horizontally (Err: -116)
+[12:59:30] [INFO] SERVOING UPDATE: Phase 2: Aligning with BBox horizontally (Err: -115)
+[12:59:30] [INFO] SERVOING UPDATE: Phase 2: Aligning with BBox horizontally (Err: -114)
+[12:59:31] [INFO] SERVOING UPDATE: Phase 2: Aligning with BBox horizontally (Err: -113)
+[12:59:31] [INFO] SERVOING UPDATE: Phase 2: Aligning with BBox horizontally (Err: -112)
+[12:59:31] [INFO] SERVOING UPDATE: Phase 2: Aligning with BBox horizontally (Err: -111)
+[12:59:32] [INFO] SERVOING UPDATE: Phase 2: Aligning with BBox horizontally (Err: -110)
+[12:59:32] [INFO] SERVOING UPDATE: Phase 2: Aligning with BBox horizontally (Err: -108)
+[12:59:32] [INFO] SERVOING UPDATE: Phase 2: Aligning with BBox horizontally (Err: -107)
+[12:59:32] [INFO] SERVOING UPDATE: Phase 2: Aligning with BBox horizontally (Err: -104)
+[12:59:32] [INFO] SERVOING UPDATE: Phase 2: Aligning with BBox horizontally (Err: -103)
+[12:59:32] [INFO] SERVOING UPDATE: Phase 2: Aligning with BBox horizontally (Err: -102)
+[12:59:33] [INFO] SERVOING UPDATE: Phase 2: Aligning with BBox horizontally (Err: -99)
+[12:59:33] [INFO] SERVOING UPDATE: Phase 2: Aligning with BBox horizontally (Err: -98)
+[12:59:33] [INFO] SERVOING UPDATE: Phase 2: Aligning with BBox horizontally (Err: -97)
+[12:59:33] [INFO] SERVOING UPDATE: Phase 2: Aligning with BBox horizontally (Err: -98)
+[12:59:33] [INFO] SERVOING UPDATE: Phase 2: Aligning with BBox horizontally (Err: -97)
+[12:59:33] [INFO] SERVOING UPDATE: Phase 2: Aligning with BBox horizontally (Err: -93)
+[12:59:33] [INFO] SERVOING UPDATE: Phase 2: Aligning with BBox horizontally (Err: -90)
+[12:59:33] [INFO] SERVOING UPDATE: Phase 2: Aligning with BBox horizontally (Err: -80)
+[12:59:34] [INFO] SERVOING UPDATE: Phase 2: Aligning with BBox horizontally (Err: -77)
+[12:59:34] [INFO] SERVOING UPDATE: Phase 2: Aligning with BBox horizontally (Err: -75)
+[12:59:34] [INFO] SERVOING UPDATE: Phase 2: Aligning with BBox horizontally (Err: -73)
+[12:59:34] [INFO] SERVOING UPDATE: Phase 2: Aligning with BBox horizontally (Err: -74)
+[12:59:34] [INFO] SERVOING UPDATE: Phase 2: Aligning with BBox horizontally (Err: -77)
+[12:59:34] [INFO] SERVOING UPDATE: Phase 2: Aligning with BBox horizontally (Err: -80)
+[12:59:34] [INFO] SERVOING UPDATE: Phase 2: Aligning with BBox horizontally (Err: -82)
+[12:59:34] [INFO] SERVOING UPDATE: Phase 2: Aligning with BBox horizontally (Err: -95)
+[12:59:34] [INFO] SERVOING UPDATE: Phase 2: Aligning with BBox horizontally (Err: -97)
+[12:59:34] [INFO] SERVOING UPDATE: Phase 2: Aligning with BBox horizontally (Err: -99)
+[12:59:35] [INFO] SERVOING UPDATE: Phase 2: Aligning with BBox horizontally (Err: -108)
+[12:59:35] [INFO] SERVOING UPDATE: Phase 2: Aligning with BBox horizontally (Err: -112)
+[12:59:35] [INFO] SERVOING UPDATE: Phase 2: Aligning with BBox horizontally (Err: -113)
+[12:59:35] [INFO] SERVOING UPDATE: Phase 2: Aligning with BBox horizontally (Err: -115)
+[12:59:35] [INFO] SERVOING UPDATE: Phase 2: Aligning with BBox horizontally (Err: -117)
+[12:59:35] [INFO] SERVOING UPDATE: Phase 2: Aligning with BBox horizontally (Err: -118)
+[12:59:35] [INFO] SERVOING UPDATE: Phase 2: Aligning with BBox horizontally (Err: -119)
+[12:59:35] [INFO] SERVOING UPDATE: Phase 2: Aligning with BBox horizontally (Err: -120)
+[12:59:36] [INFO] SERVOING UPDATE: Phase 2: Aligning with BBox horizontally (Err: -121)
+[12:59:36] [INFO] SERVOING UPDATE: Phase 2: Aligning with BBox horizontally (Err: -122)
+[12:59:36] [INFO] SERVOING UPDATE: Phase 2: Aligning with BBox horizontally (Err: -121)
+[12:59:36] [INFO] SERVOING UPDATE: Phase 2: Aligning with BBox horizontally (Err: -120)
+[12:59:36] [INFO] SERVOING UPDATE: Phase 2: Aligning with BBox horizontally (Err: -118)
+[12:59:36] [INFO] SERVOING UPDATE: Phase 2: Aligning with BBox horizontally (Err: -117)
+[12:59:36] [INFO] SERVOING UPDATE: Phase 2: Aligning with BBox horizontally (Err: -116)
+[12:59:36] [INFO] SERVOING UPDATE: Phase 2: Aligning with BBox horizontally (Err: -115)
+[12:59:36] [INFO] SERVOING UPDATE: Phase 2: Aligning with BBox horizontally (Err: -116)
+[12:59:37] [INFO] SERVOING UPDATE: Phase 2: Aligning with BBox horizontally (Err: -117)
+[12:59:37] [INFO] SERVOING UPDATE: Phase 2: Aligning with BBox horizontally (Err: -116)
+[12:59:37] [INFO] SERVOING UPDATE: Phase 2: Aligning with BBox horizontally (Err: -114)
+[12:59:37] [INFO] SERVOING UPDATE: Phase 2: Aligning with BBox horizontally (Err: -113)
+[12:59:37] [INFO] SERVOING UPDATE: Phase 2: Aligning with BBox horizontally (Err: -116)
+[12:59:37] [INFO] SERVOING UPDATE: Phase 2: Aligning with BBox horizontally (Err: -117)
+[12:59:38] [INFO] SERVOING UPDATE: Phase 2: Aligning with BBox horizontally (Err: -118)
+[12:59:38] [INFO] SERVOING UPDATE: Phase 2: Aligning with BBox horizontally (Err: -119)
+[12:59:38] [INFO] SERVOING UPDATE: Phase 2: Aligning with BBox horizontally (Err: -118)
+[12:59:38] [INFO] SERVOING UPDATE: Phase 2: Aligning with BBox horizontally (Err: -116)
+[12:59:38] [INFO] SERVOING UPDATE: Phase 2: Aligning with BBox horizontally (Err: -115)
+[12:59:38] [INFO] SERVOING UPDATE: Phase 2: Aligning with BBox horizontally (Err: -112)
+[12:59:38] [INFO] SERVOING UPDATE: Phase 2: Aligning with BBox horizontally (Err: -111)
+[12:59:38] [INFO] SERVOING UPDATE: Phase 2: Aligning with BBox horizontally (Err: -110)
+[12:59:39] [INFO] SERVOING UPDATE: Phase 2: Aligning with BBox horizontally (Err: -100)
+[12:59:39] [INFO] SERVOING UPDATE: Phase 2: Aligning with BBox horizontally (Err: -44)
+[12:59:39] [INFO] SERVOING UPDATE: Phase 3: Approaching BBox to detect handle (Size: 66/200)
+[12:59:39] [INFO] SERVOING UPDATE: Phase 3: Approaching BBox to detect handle (Size: 67/200)
+[12:59:39] [INFO] SERVOING UPDATE: Phase 3: Approaching BBox to detect handle (Size: 68/200)
+[12:59:39] [INFO] SERVOING UPDATE: Phase 3: Approaching BBox to detect handle (Size: 66/200)
+[12:59:40] [INFO] SERVOING UPDATE: Phase 3: Approaching BBox to detect handle (Size: 65/200)
+[12:59:40] [INFO] SERVOING UPDATE: Phase 3: Approaching BBox to detect handle (Size: 64/200)
+[12:59:40] [INFO] SERVOING UPDATE: Phase 3: Approaching BBox to detect handle (Size: 67/200)
+[12:59:40] [INFO] SERVOING UPDATE: Phase 3: Approaching BBox to detect handle (Size: 68/200)
+[12:59:40] [INFO] SERVOING UPDATE: Phase 3: Approaching BBox to detect handle (Size: 72/200)
+[12:59:40] [INFO] SERVOING UPDATE: Phase 3: Approaching BBox to detect handle (Size: 73/200)
+[12:59:40] [INFO] SERVOING UPDATE: Phase 3: Approaching BBox to detect handle (Size: 77/200)
+[12:59:41] [INFO] SERVOING UPDATE: Phase 3: Approaching BBox to detect handle (Size: 81/200)
+[12:59:41] [INFO] SERVOING UPDATE: Phase 3: Approaching BBox to detect handle (Size: 84/200)
+[12:59:41] [INFO] SERVOING UPDATE: Phase 3: Approaching BBox to detect handle (Size: 85/200)
+[12:59:41] [INFO] SERVOING UPDATE: Phase 3: Approaching BBox to detect handle (Size: 84/200)
+[12:59:41] [INFO] SERVOING UPDATE: Phase 3: Approaching BBox to detect handle (Size: 91/200)
+[12:59:41] [INFO] SERVOING UPDATE: Phase 3: Approaching BBox to detect handle (Size: 94/200)
+[12:59:41] [INFO] SERVOING UPDATE: Phase 3: Approaching BBox to detect handle (Size: 100/200)
+[12:59:41] [INFO] SERVOING UPDATE: Phase 3: Approaching BBox to detect handle (Size: 99/200)
+[12:59:41] [INFO] SERVOING UPDATE: Phase 3: Approaching BBox to detect handle (Size: 100/200)
+[12:59:42] [INFO] SERVOING UPDATE: Phase 3: Approaching BBox to detect handle (Size: 105/200)
+[12:59:42] [INFO] SERVOING UPDATE: Phase 3: Approaching BBox to detect handle (Size: 109/200)
+[12:59:42] [INFO] SERVOING UPDATE: Phase 3: Approaching BBox to detect handle (Size: 114/200)
+[12:59:42] [INFO] SERVOING UPDATE: Phase 3: Approaching BBox to detect handle (Size: 121/200)
+[12:59:42] [INFO] SERVOING UPDATE: Phase 3: Approaching BBox to detect handle (Size: 124/200)
+[12:59:42] [INFO] SERVOING UPDATE: Phase 3: Approaching BBox to detect handle (Size: 128/200)
+[12:59:42] [INFO] SERVOING UPDATE: Phase 3: Approaching BBox to detect handle (Size: 148/200)
+[12:59:42] [INFO] SERVOING UPDATE: Phase 3: Approaching BBox to detect handle (Size: 151/200)
+[12:59:43] [INFO] SERVOING UPDATE: Phase 3: Approaching BBox to detect handle (Size: 170/200)
+[12:59:43] [INFO] SERVOING UPDATE: Phase 4: Coarse alignment BBox-Handle (Diff: -147)
+[12:59:43] [INFO] SERVOING UPDATE: Phase 4: Coarse alignment BBox-Handle (Diff: -155)
+[12:59:43] [INFO] SERVOING UPDATE: Phase 4: Coarse alignment BBox-Handle (Diff: -160)
+[12:59:43] [INFO] SERVOING UPDATE: Phase 4: Coarse alignment BBox-Handle (Diff: -170)
+[12:59:43] [INFO] SERVOING UPDATE: Phase 4: Coarse alignment BBox-Handle (Diff: -176)
+[12:59:44] [INFO] SERVOING UPDATE: Phase 4: Coarse alignment BBox-Handle (Diff: -229)
+[12:59:44] [INFO] SERVOING UPDATE: Phase 4: Coarse alignment BBox-Handle (Diff: -343)
+[12:59:44] [INFO] SERVOING UPDATE: Phase 4: Coarse alignment BBox-Handle (Diff: -375)
+[12:59:44] [INFO] SERVOING UPDATE: Phase 4: Coarse alignment BBox-Handle (Diff: -410)
+[12:59:44] [INFO] SERVOING UPDATE: Phase 4: Coarse alignment BBox-Handle (Diff: -482)
+[12:59:44] [INFO] SERVOING UPDATE: Phase 4: Coarse alignment BBox-Handle (Diff: -585)
+[12:59:44] [INFO] SERVOING UPDATE: Phase 4: Coarse alignment BBox-Handle (Diff: -621)
+[12:59:44] [INFO] SERVOING UPDATE: Phase 4: Coarse alignment BBox-Handle (Diff: -655)
+[12:59:44] [INFO] SERVOING UPDATE: Phase 4: Coarse alignment BBox-Handle (Diff: -687)
+[12:59:44] [INFO] SERVOING UPDATE: Phase 4: Coarse alignment BBox-Handle (Diff: -805)
+[12:59:44] [INFO] SERVOING UPDATE: Phase 4: Coarse alignment BBox-Handle (Diff: -841)
+[12:59:45] [INFO] SERVOING UPDATE: Phase 4: Coarse alignment BBox-Handle (Diff: -939)
+[12:59:45] [INFO] SERVOING UPDATE: Phase 4: Coarse alignment BBox-Handle (Diff: -975)
+[12:59:45] [INFO] SERVOING UPDATE: Phase 4: Coarse alignment BBox-Handle (Diff: -989)
+[12:59:45] [INFO] SERVOING UPDATE: Phase 4: Coarse alignment BBox-Handle (Diff: -1046)
+[12:59:45] [INFO] SERVOING UPDATE: Phase 4: Coarse alignment BBox-Handle (Diff: -1113)
+[12:59:46] [INFO] SERVOING UPDATE: WAITING FOR BUTTON A
+[12:59:52] [INFO] SERVOING UPDATE: Phase 2: Aligning with BBox horizontally (Err: 111)
+[12:59:52] [INFO] SERVOING UPDATE: Phase 2: Aligning with BBox horizontally (Err: 109)
+[12:59:52] [INFO] SERVOING UPDATE: Phase 2: Aligning with BBox horizontally (Err: 108)
+[12:59:52] [INFO] SERVOING UPDATE: Phase 2: Aligning with BBox horizontally (Err: 97)
+[12:59:52] [INFO] SERVOING UPDATE: Phase 2: Aligning with BBox horizontally (Err: 84)
+[12:59:52] [INFO] SERVOING UPDATE: Phase 2: Aligning with BBox horizontally (Err: 75)
+[12:59:52] [INFO] SERVOING UPDATE: Phase 2: Aligning with BBox horizontally (Err: 65)
+[12:59:52] [INFO] SERVOING UPDATE: Phase 2: Aligning with BBox horizontally (Err: 49)
+[12:59:52] [INFO] SERVOING UPDATE: Phase 2: Aligning with BBox horizontally (Err: 43)
+[12:59:53] [INFO] SERVOING UPDATE: Phase 4: Coarse alignment BBox-Handle (Diff: -117)
+[12:59:53] [INFO] SERVOING UPDATE: Phase 4: Coarse alignment BBox-Handle (Diff: -116)
+[12:59:53] [INFO] SERVOING UPDATE: Phase 4: Coarse alignment BBox-Handle (Diff: -114)
+[12:59:53] [INFO] SERVOING UPDATE: Phase 4: Coarse alignment BBox-Handle (Diff: -113)
+[12:59:53] [INFO] SERVOING UPDATE: Phase 4: Coarse alignment BBox-Handle (Diff: -138)
+[12:59:53] [INFO] SERVOING UPDATE: Phase 4: Coarse alignment BBox-Handle (Diff: -113)
+[12:59:53] [INFO] SERVOING UPDATE: Phase 4: Coarse alignment BBox-Handle (Diff: -128)
+[12:59:54] [INFO] SERVOING UPDATE: Phase 4: Coarse alignment BBox-Handle (Diff: -184)
+[12:59:54] [INFO] SERVOING UPDATE: Phase 4: Coarse alignment BBox-Handle (Diff: -222)
+[12:59:54] [INFO] SERVOING UPDATE: Phase 4: Coarse alignment BBox-Handle (Diff: -274)
+[12:59:54] [INFO] SERVOING UPDATE: Phase 4: Coarse alignment BBox-Handle (Diff: -106)
+[12:59:54] [INFO] SERVOING UPDATE: Phase 4: Coarse alignment BBox-Handle (Diff: -110)
+[12:59:54] [INFO] SERVOING UPDATE: Phase 4: Coarse alignment BBox-Handle (Diff: -103)
+[12:59:54] [INFO] SERVOING UPDATE: Phase 4: Coarse alignment BBox-Handle (Diff: -102)
+[12:59:54] [INFO] SERVOING UPDATE: Phase 4: Coarse alignment BBox-Handle (Diff: -101)
+[12:59:54] [INFO] SERVOING UPDATE: Phase 4: Coarse alignment BBox-Handle (Diff: -98)
+[12:59:55] [INFO] SERVOING UPDATE: Phase 4: Coarse alignment BBox-Handle (Diff: -96)
+[12:59:55] [INFO] SERVOING UPDATE: Phase 4: Coarse alignment BBox-Handle (Diff: -94)
+[12:59:55] [INFO] SERVOING UPDATE: Phase 4: Coarse alignment BBox-Handle (Diff: -93)
+[12:59:55] [INFO] SERVOING UPDATE: Phase 4: Coarse alignment BBox-Handle (Diff: -91)
+[12:59:55] [INFO] SERVOING UPDATE: Phase 4: Coarse alignment BBox-Handle (Diff: -102)
+[12:59:55] [INFO] SERVOING UPDATE: Phase 4: Coarse alignment BBox-Handle (Diff: -86)
+[12:59:55] [INFO] SERVOING UPDATE: Phase 4: Coarse alignment BBox-Handle (Diff: -85)
+[12:59:55] [INFO] SERVOING UPDATE: Phase 4: Coarse alignment BBox-Handle (Diff: -82)
+[12:59:55] [INFO] SERVOING UPDATE: Phase 4: Coarse alignment BBox-Handle (Diff: -76)
+[12:59:55] [INFO] SERVOING UPDATE: Phase 4: Coarse alignment BBox-Handle (Diff: -73)
+[12:59:56] [INFO] SERVOING UPDATE: Phase 4: Coarse alignment BBox-Handle (Diff: -67)
+[12:59:56] [INFO] SERVOING UPDATE: Phase 4: Coarse alignment BBox-Handle (Diff: -64)
+[12:59:56] [INFO] SERVOING UPDATE: Phase 4: Coarse alignment BBox-Handle (Diff: -62)
+[12:59:56] [INFO] SERVOING UPDATE: Phase 4: Coarse alignment BBox-Handle (Diff: -60)
+[12:59:56] [INFO] SERVOING UPDATE: Phase 4: Coarse alignment BBox-Handle (Diff: -57)
+[12:59:56] [INFO] SERVOING UPDATE: Phase 4: Coarse alignment BBox-Handle (Diff: -54)
+[12:59:56] [INFO] SERVOING UPDATE: Phase 4: Coarse alignment BBox-Handle (Diff: -49)
+[12:59:56] [INFO] SERVOING UPDATE: Phase 4: Coarse alignment BBox-Handle (Diff: -47)
+[12:59:56] [INFO] SERVOING UPDATE: Phase 4: Coarse alignment BBox-Handle (Diff: -44)
+[12:59:56] [INFO] SERVOING UPDATE: Phase 4: Coarse alignment BBox-Handle (Diff: -41)
+[12:59:56] [INFO] SERVOING UPDATE: Phase 4: Coarse alignment BBox-Handle (Diff: -38)
+[12:59:56] [INFO] SERVOING UPDATE: Phase 4: Coarse alignment BBox-Handle (Diff: -35)
+[12:59:56] [INFO] SERVOING UPDATE: Phase 4: Coarse alignment BBox-Handle (Diff: -34)
+[12:59:57] [INFO] SERVOING UPDATE: Phase 4: Coarse alignment BBox-Handle (Diff: -26)
+[12:59:57] [INFO] SERVOING UPDATE: Phase 4: Coarse alignment BBox-Handle (Diff: -28)
+[12:59:57] [INFO] SERVOING UPDATE: Phase 4: Coarse alignment BBox-Handle (Diff: -32)
+[12:59:57] [INFO] SERVOING UPDATE: Phase 4: Coarse alignment BBox-Handle (Diff: -31)
+[12:59:57] [INFO] SERVOING UPDATE: Phase 4: Coarse alignment BBox-Handle (Diff: -22)
+[12:59:57] [INFO] SERVOING UPDATE: Phase 4: Coarse alignment BBox-Handle (Diff: -18)
+[12:59:57] [INFO] SERVOING UPDATE: Phase 4: Coarse alignment BBox-Handle (Diff: -19)
+[12:59:57] [INFO] SERVOING UPDATE: Phase 4: Coarse alignment BBox-Handle (Diff: -17)
+[12:59:57] [INFO] SERVOING UPDATE: Phase 4: Coarse alignment BBox-Handle (Diff: -14)
+[12:59:58] [INFO] SERVOING UPDATE: Phase 4: Coarse alignment BBox-Handle (Diff: -12)
+[12:59:58] [INFO] SERVOING UPDATE: Phase 4: Coarse alignment BBox-Handle (Diff: -15)
+[12:59:58] [INFO] SERVOING UPDATE: Phase 4: Coarse alignment BBox-Handle (Diff: -14)
+[12:59:58] [INFO] SERVOING UPDATE: Phase 4: Coarse alignment BBox-Handle (Diff: -10)
+[12:59:58] [INFO] SERVOING UPDATE: Phase 4: Coarse alignment BBox-Handle (Diff: -11)
+[12:59:58] [INFO] SERVOING UPDATE: Phase 5: Descending to -4.885m & Aligning (D_Err: -0.35 | A_Err: -10)
+[12:59:58] [INFO] SERVOING UPDATE: Phase 5: Descending to -4.885m & Aligning (D_Err: -0.35 | A_Err: -9)
+[12:59:58] [INFO] SERVOING UPDATE: Phase 5: Descending to -4.885m & Aligning (D_Err: -0.36 | A_Err: -9)
+[12:59:58] [INFO] SERVOING UPDATE: Phase 5: Descending to -4.885m & Aligning (D_Err: -0.36 | A_Err: -8)
+[12:59:58] [INFO] SERVOING UPDATE: Phase 5: Descending to -4.885m & Aligning (D_Err: -0.36 | A_Err: -9)
+[12:59:58] [INFO] SERVOING UPDATE: Phase 5: Descending to -4.885m & Aligning (D_Err: -0.35 | A_Err: -9)
+[12:59:58] [INFO] SERVOING UPDATE: Phase 5: Descending to -4.885m & Aligning (D_Err: -0.36 | A_Err: -9)
+[12:59:58] [INFO] SERVOING UPDATE: Phase 5: Descending to -4.885m & Aligning (D_Err: -0.36 | A_Err: -16)
+[12:59:59] [INFO] SERVOING UPDATE: Phase 5: Descending to -4.885m & Aligning (D_Err: -0.36 | A_Err: -18)
+[12:59:59] [INFO] SERVOING UPDATE: Phase 5: Descending to -4.885m & Aligning (D_Err: -0.36 | A_Err: -20)
+[12:59:59] [INFO] SERVOING UPDATE: Phase 5: Descending to -4.885m & Aligning (D_Err: -0.36 | A_Err: -18)
+[12:59:59] [INFO] SERVOING UPDATE: Phase 5: Descending to -4.885m & Aligning (D_Err: -0.35 | A_Err: -18)
+[12:59:59] [INFO] SERVOING UPDATE: Phase 5: Descending to -4.885m & Aligning (D_Err: -0.35 | A_Err: -10)
+[12:59:59] [INFO] SERVOING UPDATE: Phase 5: Descending to -4.885m & Aligning (D_Err: -0.34 | A_Err: 3)
+[12:59:59] [INFO] SERVOING UPDATE: Phase 5: Descending to -4.885m & Aligning (D_Err: -0.32 | A_Err: -3)
+[12:59:59] [INFO] SERVOING UPDATE: Phase 5: Descending to -4.885m & Aligning (D_Err: -0.32 | A_Err: -5)
+[12:59:59] [INFO] SERVOING UPDATE: Phase 5: Descending to -4.885m & Aligning (D_Err: -0.31 | A_Err: -3)
+[12:59:59] [INFO] SERVOING UPDATE: Phase 5: Descending to -4.885m & Aligning (D_Err: -0.29 | A_Err: -3)
+[12:59:59] [INFO] SERVOING UPDATE: Phase 5: Descending to -4.885m & Aligning (D_Err: -0.29 | A_Err: 3)
+[12:59:59] [INFO] SERVOING UPDATE: Phase 5: Descending to -4.885m & Aligning (D_Err: -0.27 | A_Err: -3)
+[12:59:59] [INFO] SERVOING UPDATE: Phase 5: Descending to -4.885m & Aligning (D_Err: -0.25 | A_Err: -3)
+[13:00:00] [INFO] SERVOING UPDATE: Phase 5: Descending to -4.885m & Aligning (D_Err: -0.25 | A_Err: -5)
+[13:00:00] [INFO] SERVOING UPDATE: Phase 5: Descending to -4.885m & Aligning (D_Err: -0.22 | A_Err: -5)
+[13:00:00] [INFO] SERVOING UPDATE: Phase 5: Descending to -4.885m & Aligning (D_Err: -0.20 | A_Err: -3)
+[13:00:00] [INFO] SERVOING UPDATE: Phase 5: Descending to -4.885m & Aligning (D_Err: -0.20 | A_Err: -1)
+[13:00:00] [INFO] SERVOING UPDATE: Phase 5: Descending to -4.885m & Aligning (D_Err: -0.18 | A_Err: -1)
+[13:00:00] [INFO] SERVOING UPDATE: Phase 5: Descending to -4.885m & Aligning (D_Err: -0.16 | A_Err: -1)
+[13:00:00] [INFO] SERVOING UPDATE: Phase 5: Descending to -4.885m & Aligning (D_Err: -0.14 | A_Err: 6)
+[13:00:00] [INFO] SERVOING UPDATE: Phase 5: Descending to -4.885m & Aligning (D_Err: -0.12 | A_Err: 6)
+[13:00:00] [INFO] SERVOING UPDATE: Phase 5: Descending to -4.885m & Aligning (D_Err: -0.12 | A_Err: 17)
+[13:00:00] [INFO] SERVOING UPDATE: Phase 5: Descending to -4.885m & Aligning (D_Err: -0.10 | A_Err: 17)
+[13:00:00] [INFO] SERVOING UPDATE: Phase 5: Descending to -4.885m & Aligning (D_Err: -0.08 | A_Err: 26)
+[13:00:00] [INFO] SERVOING UPDATE: Phase 5: Descending to -4.885m & Aligning (D_Err: -0.08 | A_Err: 30)
+[13:00:00] [INFO] SERVOING UPDATE: Phase 5: Descending to -4.885m & Aligning (D_Err: -0.08 | A_Err: 38)
+[13:00:00] [INFO] SERVOING UPDATE: Phase 5: Descending to -4.885m & Aligning (D_Err: -0.07 | A_Err: 38)
+[13:00:00] [INFO] SERVOING UPDATE: Phase 5: Descending to -4.885m & Aligning (D_Err: -0.05 | A_Err: 38)
+[13:00:00] [INFO] SERVOING UPDATE: Phase 5: Descending to -4.885m & Aligning (D_Err: -0.05 | A_Err: 43)
+[13:00:01] [INFO] SERVOING UPDATE: Phase 5: Descending to -4.885m & Aligning (D_Err: -0.05 | A_Err: 47)
+[13:00:01] [INFO] SERVOING UPDATE: Phase 5: Descending to -4.885m & Aligning (D_Err: -0.04 | A_Err: 47)
+[13:00:01] [INFO] SERVOING UPDATE: Phase 5: Descending to -4.885m & Aligning (D_Err: -0.03 | A_Err: 64)
+[13:00:01] [INFO] SERVOING UPDATE: Phase 5: Descending to -4.885m & Aligning (D_Err: -0.02 | A_Err: 64)
+[13:00:01] [INFO] SERVOING UPDATE: Phase 5: Descending to -4.885m & Aligning (D_Err: -0.01 | A_Err: 74)
+[13:00:01] [INFO] SERVOING UPDATE: Phase 5: Descending to -4.885m & Aligning (D_Err: -0.01 | A_Err: 89)
+[13:00:01] [INFO] SERVOING UPDATE: Phase 5: Descending to -4.885m & Aligning (D_Err: -0.00 | A_Err: 89)
+[13:00:01] [INFO] SERVOING UPDATE: Phase 6: Final 3-Point Station Keeping (P:True C:False Sz:False)
+[13:00:02] [INFO] SERVOING UPDATE: Phase 6: Final 3-Point Station Keeping (P:False C:False Sz:False)
+[13:00:02] [INFO] SERVOING UPDATE: Phase 6: Final 3-Point Station Keeping (P:True C:True Sz:False)
+[13:00:02] [INFO] SERVOING UPDATE: Phase 6: Final 3-Point Station Keeping (P:False C:True Sz:False)
+[13:00:02] [INFO] SERVOING UPDATE: Phase 6: Final 3-Point Station Keeping (P:True C:False Sz:False)
+[13:00:04] [INFO] SERVOING UPDATE: Phase 6: Final 3-Point Station Keeping (P:False C:False Sz:False)
+[13:00:04] [INFO] SERVOING UPDATE: Phase 6: Final 3-Point Station Keeping (P:True C:False Sz:False)
+[13:00:05] [INFO] SERVOING UPDATE: Phase 6: Final 3-Point Station Keeping (P:False C:False Sz:False)
+[13:00:05] [INFO] SERVOING UPDATE: Phase 6: Final 3-Point Station Keeping (P:True C:False Sz:False)
+[13:00:05] [INFO] SERVOING UPDATE: Phase 6: Final 3-Point Station Keeping (P:False C:False Sz:False)
+[13:00:06] [INFO] SERVOING UPDATE: Phase 6: Final 3-Point Station Keeping (P:False C:False Sz:True)
+[13:00:06] [INFO] SERVOING UPDATE: Phase 6: Final 3-Point Station Keeping (P:False C:False Sz:False)
+[13:00:07] [INFO] SERVOING UPDATE: Phase 6: Final 3-Point Station Keeping (P:False C:False Sz:True)
+[13:00:08] [INFO] SERVOING UPDATE: Phase 6: Final 3-Point Station Keeping (P:False C:False Sz:False)
+[13:00:09] [INFO] SERVOING UPDATE: Phase 6: Final 3-Point Station Keeping (P:True C:False Sz:False)
+[13:00:09] [INFO] SERVOING UPDATE: Phase 6: Final 3-Point Station Keeping (P:False C:False Sz:False)
+[13:00:09] [INFO] SERVOING UPDATE: Phase 6: Final 3-Point Station Keeping (P:False C:False Sz:True)
+[13:00:10] [INFO] SERVOING UPDATE: Phase 6: Final 3-Point Station Keeping (P:False C:False Sz:False)
+[13:00:11] [INFO] SERVOING UPDATE: Phase 6: Final 3-Point Station Keeping (P:True C:False Sz:False)
+[13:00:11] [INFO] SERVOING UPDATE: Phase 6: Final 3-Point Station Keeping (P:False C:False Sz:False)
+[13:00:11] [INFO] SERVOING UPDATE: Phase 6: Final 3-Point Station Keeping (P:True C:False Sz:False)
+[13:00:11] [INFO] SERVOING UPDATE: Phase 6: Final 3-Point Station Keeping (P:False C:False Sz:False)
+[13:00:11] [INFO] SERVOING UPDATE: Phase 6: Final 3-Point Station Keeping (P:True C:False Sz:False)
+[13:00:11] [INFO] SERVOING UPDATE: Phase 6: Final 3-Point Station Keeping (P:False C:False Sz:False)
+[13:00:11] [INFO] SERVOING UPDATE: Phase 6: Final 3-Point Station Keeping (P:True C:False Sz:True)
+[13:00:12] [INFO] SERVOING UPDATE: Phase 6: Final 3-Point Station Keeping (P:False C:False Sz:True)
+[13:00:12] [INFO] SERVOING UPDATE: Phase 6: Final 3-Point Station Keeping (P:False C:False Sz:False)
+[13:00:12] [INFO] SERVOING UPDATE: Phase 6: Final 3-Point Station Keeping (P:True C:False Sz:False)
+[13:00:12] [INFO] SERVOING UPDATE: Phase 6: Final 3-Point Station Keeping (P:False C:False Sz:False)
+[13:00:12] [INFO] SERVOING UPDATE: Phase 6: Final 3-Point Station Keeping (P:True C:False Sz:False)
+[13:00:12] [INFO] SERVOING UPDATE: Phase 6: Final 3-Point Station Keeping (P:False C:False Sz:False)
+[13:00:12] [INFO] SERVOING UPDATE: Phase 6: Final 3-Point Station Keeping (P:True C:False Sz:False)
+[13:00:13] [INFO] SERVOING UPDATE: Phase 6: Final 3-Point Station Keeping (P:False C:False Sz:False)
+[13:00:13] [INFO] SERVOING UPDATE: Phase 6: Final 3-Point Station Keeping (P:True C:False Sz:False)
+[13:00:13] [INFO] SERVOING UPDATE: Phase 6: Final 3-Point Station Keeping (P:True C:False Sz:True)
+[13:00:13] [INFO] SERVOING UPDATE: Phase 6: Final 3-Point Station Keeping (P:True C:False Sz:False)
+[13:00:13] [INFO] SERVOING UPDATE: Phase 6: Final 3-Point Station Keeping (P:False C:True Sz:False)
+[13:00:13] [INFO] SERVOING UPDATE: Phase 6: Final 3-Point Station Keeping (P:True C:True Sz:False)
+[13:00:13] [INFO] SERVOING UPDATE: Phase 6: Final 3-Point Station Keeping (P:False C:True Sz:False)
+[13:00:13] [INFO] SERVOING UPDATE: Phase 6: Final 3-Point Station Keeping (P:True C:True Sz:False)
+[13:00:14] [INFO] SERVOING UPDATE: Phase 6: Final 3-Point Station Keeping (P:False C:True Sz:False)
+[13:00:14] [INFO] SERVOING UPDATE: Phase 6: Final 3-Point Station Keeping (P:True C:True Sz:False)
+[13:00:14] [INFO] SERVOING UPDATE: Phase 6: Final 3-Point Station Keeping (P:False C:True Sz:False)
+[13:00:14] [INFO] SERVOING UPDATE: Phase 6: Final 3-Point Station Keeping (P:True C:True Sz:False)
+[13:00:14] [INFO] SERVOING UPDATE: Phase 6: Final 3-Point Station Keeping (P:False C:True Sz:False)
+[13:00:14] [INFO] SERVOING UPDATE: Phase 6: Final 3-Point Station Keeping (P:False C:True Sz:True)
+[13:00:14] [INFO] SERVOING UPDATE: Phase 6: Final 3-Point Station Keeping (P:False C:False Sz:True)
+[13:00:15] [INFO] SERVOING UPDATE: Phase 6: Final 3-Point Station Keeping (P:True C:False Sz:False)
+[13:00:15] [INFO] SERVOING UPDATE: Phase 6: Final 3-Point Station Keeping (P:False C:False Sz:False)
+[13:00:15] [INFO] SERVOING UPDATE: Phase 6: Final 3-Point Station Keeping (P:True C:False Sz:False)
+[13:00:15] [INFO] SERVOING UPDATE: Phase 6: Final 3-Point Station Keeping (P:False C:False Sz:False)
+[13:00:15] [INFO] SERVOING UPDATE: Phase 6: Final 3-Point Station Keeping (P:True C:False Sz:False)
+[13:00:16] [INFO] SERVOING UPDATE: Phase 6: Final 3-Point Station Keeping (P:False C:False Sz:False)
+[13:00:16] [INFO] SERVOING UPDATE: Phase 6: Final 3-Point Station Keeping (P:True C:False Sz:False)
+[13:00:16] [INFO] SERVOING UPDATE: Phase 6: Final 3-Point Station Keeping (P:False C:False Sz:False)
+[13:00:16] [INFO] SERVOING UPDATE: Phase 6: Final 3-Point Station Keeping (P:False C:False Sz:True)
+[13:00:16] [INFO] SERVOING UPDATE: Phase 6: Final 3-Point Station Keeping (P:False C:False Sz:False)
+[13:00:17] [INFO] SERVOING UPDATE: Phase 6: Final 3-Point Station Keeping (P:True C:False Sz:False)
+[13:00:17] [INFO] SERVOING UPDATE: Phase 6: Final 3-Point Station Keeping (P:False C:False Sz:True)
+[13:00:17] [INFO] SERVOING UPDATE: Phase 6: Final 3-Point Station Keeping (P:True C:False Sz:True)
+[13:00:18] [INFO] SERVOING UPDATE: Phase 6: Final 3-Point Station Keeping (P:False C:False Sz:True)
+[13:00:18] [INFO] SERVOING UPDATE: Phase 6: Final 3-Point Station Keeping (P:False C:False Sz:False)
+[13:00:19] [INFO] SERVOING UPDATE: Phase 6: Final 3-Point Station Keeping (P:True C:False Sz:False)
+[13:00:19] [INFO] SERVOING UPDATE: Phase 6: Final 3-Point Station Keeping (P:True C:False Sz:True)
+[13:00:19] [INFO] SERVOING UPDATE: Phase 6: Final 3-Point Station Keeping (P:True C:False Sz:False)
+[13:00:20] [INFO] SERVOING UPDATE: Phase 6: Final 3-Point Station Keeping (P:False C:False Sz:False)
+[13:00:20] [INFO] SERVOING UPDATE: Phase 6: Final 3-Point Station Keeping (P:True C:False Sz:False)
+[13:00:20] [INFO] SERVOING UPDATE: Phase 6: Final 3-Point Station Keeping (P:True C:True Sz:False)
+[13:00:20] [INFO] SERVOING UPDATE: Phase 7: GOING >:) (Blind Surge: 5.0s)
+[13:00:20] [INFO] >>> APPROACH SEQUENCE FINISHED (Blind Surge Started). <<<
+[13:00:21] [INFO] Did the robot grab the box?
+[13:00:21] [INFO] PRESS 'B' to CONFIRM Grasp.
+[13:00:21] [INFO] PRESS 'A' to REJECT and RETRY approach.
+[13:00:21] [INFO] USER: Grasp Failed / Rejected.
+[13:00:21] [INFO] ACTION: Moving to start approach position. Please manually reposition.
+[13:00:21] [INFO] Press 'A' again when ready to RETRY APPROACH.
+[13:00:21] [INFO] USER: Ready to Retry.
+[13:00:21] [INFO] Restarting Visual Approach Sequence...
+[13:00:21] [INFO] SERVOING UPDATE: Phase 7: GOING >:) (Blind Surge: 4.7s)
+[13:00:21] [INFO] >>> APPROACH SEQUENCE FINISHED (Blind Surge Started). <<<
+[13:00:21] [INFO] Did the robot grab the box?
+[13:00:21] [INFO] PRESS 'B' to CONFIRM Grasp.
+[13:00:21] [INFO] PRESS 'A' to REJECT and RETRY approach.
+[13:00:21] [INFO] USER: Grasp Failed / Rejected.
+[13:00:21] [INFO] ACTION: Moving to start approach position. Please manually reposition.
+[13:00:21] [INFO] Press 'A' again when ready to RETRY APPROACH.
+[13:00:21] [INFO] USER: Ready to Retry.
+[13:00:21] [INFO] Restarting Visual Approach Sequence...
+[13:00:21] [INFO] SERVOING UPDATE: Phase 7: GOING >:) (Blind Surge: 4.6s)
+[13:00:21] [INFO] >>> APPROACH SEQUENCE FINISHED (Blind Surge Started). <<<
+[13:00:21] [INFO] Did the robot grab the box?
+[13:00:21] [INFO] PRESS 'B' to CONFIRM Grasp.
+[13:00:21] [INFO] PRESS 'A' to REJECT and RETRY approach.
+[13:00:21] [INFO] USER: Grasp Failed / Rejected.
+[13:00:21] [INFO] ACTION: Moving to start approach position. Please manually reposition.
+[13:00:21] [INFO] Press 'A' again when ready to RETRY APPROACH.
+[13:00:21] [INFO] USER: Ready to Retry.
+[13:00:21] [INFO] Restarting Visual Approach Sequence...
+[13:00:21] [INFO] SERVOING UPDATE: Phase 7: GOING >:) (Blind Surge: 4.4s)
+[13:00:21] [INFO] >>> APPROACH SEQUENCE FINISHED (Blind Surge Started). <<<
+[13:00:21] [INFO] Did the robot grab the box?
+[13:00:21] [INFO] PRESS 'B' to CONFIRM Grasp.
+[13:00:21] [INFO] PRESS 'A' to REJECT and RETRY approach.
+[13:00:21] [INFO] USER: Grasp Failed / Rejected.
+[13:00:21] [INFO] ACTION: Moving to start approach position. Please manually reposition.
+[13:00:21] [INFO] Press 'A' again when ready to RETRY APPROACH.
+[13:00:21] [INFO] USER: Ready to Retry.
+[13:00:21] [INFO] Restarting Visual Approach Sequence...
+[13:00:21] [INFO] SERVOING UPDATE: Phase 7: GOING >:) (Blind Surge: 4.2s)
+[13:00:21] [INFO] >>> APPROACH SEQUENCE FINISHED (Blind Surge Started). <<<
+[13:00:21] [INFO] Did the robot grab the box?
+[13:00:21] [INFO] PRESS 'B' to CONFIRM Grasp.
+[13:00:21] [INFO] PRESS 'A' to REJECT and RETRY approach.
+[13:00:21] [INFO] USER: Grasp Failed / Rejected.
+[13:00:21] [INFO] ACTION: Moving to start approach position. Please manually reposition.
+[13:00:21] [INFO] Press 'A' again when ready to RETRY APPROACH.
+[13:00:21] [INFO] USER: Ready to Retry.
+[13:00:21] [INFO] Restarting Visual Approach Sequence...
+[13:00:21] [INFO] SERVOING UPDATE: Phase 7: GOING >:) (Blind Surge: 4.0s)
+[13:00:21] [INFO] >>> APPROACH SEQUENCE FINISHED (Blind Surge Started). <<<
+[13:00:22] [INFO] Did the robot grab the box?
+[13:00:22] [INFO] PRESS 'B' to CONFIRM Grasp.
+[13:00:22] [INFO] PRESS 'A' to REJECT and RETRY approach.
+[13:00:22] [INFO] USER: Grasp Failed / Rejected.
+[13:00:22] [INFO] ACTION: Moving to start approach position. Please manually reposition.
+[13:00:22] [INFO] Press 'A' again when ready to RETRY APPROACH.
+[13:00:22] [INFO] USER: Ready to Retry.
+[13:00:22] [INFO] Restarting Visual Approach Sequence...
+[13:00:22] [INFO] SERVOING UPDATE: Phase 7: GOING >:) (Blind Surge: 3.8s)
+[13:00:22] [INFO] >>> APPROACH SEQUENCE FINISHED (Blind Surge Started). <<<
+[13:00:22] [INFO] Did the robot grab the box?
+[13:00:22] [INFO] PRESS 'B' to CONFIRM Grasp.
+[13:00:22] [INFO] PRESS 'A' to REJECT and RETRY approach.
+[13:00:22] [INFO] USER: Grasp Failed / Rejected.
+[13:00:22] [INFO] ACTION: Moving to start approach position. Please manually reposition.
+[13:00:22] [INFO] Press 'A' again when ready to RETRY APPROACH.
+[13:00:22] [INFO] USER: Ready to Retry.
+[13:00:22] [INFO] Restarting Visual Approach Sequence...
+[13:00:22] [INFO] SERVOING UPDATE: Phase 7: GOING >:) (Blind Surge: 3.6s)
+[13:00:22] [INFO] >>> APPROACH SEQUENCE FINISHED (Blind Surge Started). <<<
+[13:00:22] [INFO] Did the robot grab the box?
+[13:00:22] [INFO] PRESS 'B' to CONFIRM Grasp.
+[13:00:22] [INFO] PRESS 'A' to REJECT and RETRY approach.
+[13:00:22] [INFO] USER: Grasp Failed / Rejected.
+[13:00:22] [INFO] ACTION: Moving to start approach position. Please manually reposition.
+[13:00:22] [INFO] Press 'A' again when ready to RETRY APPROACH.
+[13:00:22] [INFO] USER: Ready to Retry.
+[13:00:22] [INFO] Restarting Visual Approach Sequence...
+[13:00:22] [INFO] SERVOING UPDATE: Phase 7: GOING >:) (Blind Surge: 3.4s)
+[13:00:22] [INFO] >>> APPROACH SEQUENCE FINISHED (Blind Surge Started). <<<
+[13:00:22] [INFO] Did the robot grab the box?
+[13:00:22] [INFO] PRESS 'B' to CONFIRM Grasp.
+[13:00:22] [INFO] PRESS 'A' to REJECT and RETRY approach.
+[13:00:22] [INFO] USER: Grasp Failed / Rejected.
+[13:00:22] [INFO] ACTION: Moving to start approach position. Please manually reposition.
+[13:00:22] [INFO] Press 'A' again when ready to RETRY APPROACH.
+[13:00:22] [INFO] USER: Ready to Retry.
+[13:00:22] [INFO] Restarting Visual Approach Sequence...
+[13:00:22] [INFO] SERVOING UPDATE: Phase 7: GOING >:) (Blind Surge: 3.2s)
+[13:00:22] [INFO] >>> APPROACH SEQUENCE FINISHED (Blind Surge Started). <<<
+[13:00:22] [INFO] Did the robot grab the box?
+[13:00:22] [INFO] PRESS 'B' to CONFIRM Grasp.
+[13:00:22] [INFO] PRESS 'A' to REJECT and RETRY approach.
+[13:00:22] [INFO] USER: Grasp Failed / Rejected.
+[13:00:22] [INFO] ACTION: Moving to start approach position. Please manually reposition.
+[13:00:22] [INFO] Press 'A' again when ready to RETRY APPROACH.
+[13:00:22] [INFO] USER: Ready to Retry.
+[13:00:22] [INFO] Restarting Visual Approach Sequence...
+[13:00:22] [INFO] SERVOING UPDATE: Phase 7: GOING >:) (Blind Surge: 3.0s)
+[13:00:22] [INFO] >>> APPROACH SEQUENCE FINISHED (Blind Surge Started). <<<
+[13:00:23] [INFO] Did the robot grab the box?
+[13:00:23] [INFO] PRESS 'B' to CONFIRM Grasp.
+[13:00:23] [INFO] PRESS 'A' to REJECT and RETRY approach.
+[13:00:23] [INFO] USER: Grasp Failed / Rejected.
+[13:00:23] [INFO] ACTION: Moving to start approach position. Please manually reposition.
+[13:00:23] [INFO] Press 'A' again when ready to RETRY APPROACH.
+[13:00:23] [INFO] USER: Ready to Retry.
+[13:00:23] [INFO] Restarting Visual Approach Sequence...
+[13:00:23] [INFO] SERVOING UPDATE: Phase 7: GOING >:) (Blind Surge: 2.8s)
+[13:00:23] [INFO] >>> APPROACH SEQUENCE FINISHED (Blind Surge Started). <<<
+[13:00:23] [INFO] Did the robot grab the box?
+[13:00:23] [INFO] PRESS 'B' to CONFIRM Grasp.
+[13:00:23] [INFO] PRESS 'A' to REJECT and RETRY approach.
+[13:00:23] [INFO] USER: Grasp Failed / Rejected.
+[13:00:23] [INFO] ACTION: Moving to start approach position. Please manually reposition.
+[13:00:23] [INFO] Press 'A' again when ready to RETRY APPROACH.
+[13:00:23] [INFO] USER: Ready to Retry.
+[13:00:23] [INFO] Restarting Visual Approach Sequence...
+[13:00:23] [INFO] SERVOING UPDATE: Phase 7: GOING >:) (Blind Surge: 2.6s)
+[13:00:23] [INFO] >>> APPROACH SEQUENCE FINISHED (Blind Surge Started). <<<
+[13:00:23] [INFO] Did the robot grab the box?
+[13:00:23] [INFO] PRESS 'B' to CONFIRM Grasp.
+[13:00:23] [INFO] PRESS 'A' to REJECT and RETRY approach.
+[13:00:23] [INFO] USER: Grasp Failed / Rejected.
+[13:00:23] [INFO] ACTION: Moving to start approach position. Please manually reposition.
+[13:00:23] [INFO] Press 'A' again when ready to RETRY APPROACH.
+[13:00:23] [INFO] USER: Ready to Retry.
+[13:00:23] [INFO] Restarting Visual Approach Sequence...
+[13:00:23] [INFO] SERVOING UPDATE: Phase 7: GOING >:) (Blind Surge: 2.4s)
+[13:00:23] [INFO] >>> APPROACH SEQUENCE FINISHED (Blind Surge Started). <<<
+[13:00:23] [INFO] Did the robot grab the box?
+[13:00:23] [INFO] PRESS 'B' to CONFIRM Grasp.
+[13:00:23] [INFO] PRESS 'A' to REJECT and RETRY approach.
+[13:00:23] [INFO] USER: Grasp Failed / Rejected.
+[13:00:23] [INFO] ACTION: Moving to start approach position. Please manually reposition.
+[13:00:23] [INFO] Press 'A' again when ready to RETRY APPROACH.
+[13:00:23] [INFO] USER: Ready to Retry.
+[13:00:23] [INFO] Restarting Visual Approach Sequence...
+[13:00:23] [INFO] SERVOING UPDATE: Phase 7: GOING >:) (Blind Surge: 2.2s)
+[13:00:23] [INFO] >>> APPROACH SEQUENCE FINISHED (Blind Surge Started). <<<
+[13:00:23] [INFO] Did the robot grab the box?
+[13:00:23] [INFO] PRESS 'B' to CONFIRM Grasp.
+[13:00:23] [INFO] PRESS 'A' to REJECT and RETRY approach.
+[13:00:23] [INFO] USER: Grasp Failed / Rejected.
+[13:00:23] [INFO] ACTION: Moving to start approach position. Please manually reposition.
+[13:00:23] [INFO] Press 'A' again when ready to RETRY APPROACH.
+[13:00:23] [INFO] USER: Ready to Retry.
+[13:00:23] [INFO] Restarting Visual Approach Sequence...
+[13:00:23] [INFO] SERVOING UPDATE: Phase 7: GOING >:) (Blind Surge: 2.0s)
+[13:00:23] [INFO] >>> APPROACH SEQUENCE FINISHED (Blind Surge Started). <<<
+[13:00:24] [INFO] Did the robot grab the box?
+[13:00:24] [INFO] PRESS 'B' to CONFIRM Grasp.
+[13:00:24] [INFO] PRESS 'A' to REJECT and RETRY approach.
+[13:00:24] [INFO] USER: Grasp Failed / Rejected.
+[13:00:24] [INFO] ACTION: Moving to start approach position. Please manually reposition.
+[13:00:24] [INFO] Press 'A' again when ready to RETRY APPROACH.
+[13:05:00] [INFO] Mission Aborted.

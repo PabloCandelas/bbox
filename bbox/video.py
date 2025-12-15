@@ -56,9 +56,9 @@ class Controller(Node):
 
         # --- WINDOW SETUP (NEW) ---
         # WINDOW_NORMAL allows you to resize the window with your mouse
-        cv2.namedWindow('BlueROV2 Camera', cv2.WINDOW_NORMAL)
+        #cv2.namedWindow('BlueROV2 Camera', cv2.WINDOW_NORMAL)
         # Set initial size to something manageable (e.g., 960x540) so it doesn't take up the whole screen
-        cv2.resizeWindow('BlueROV2 Camera', 960, 540)
+        #cv2.resizeWindow('BlueROV2 Camera', 960, 540)
 
         self.run()
 
@@ -170,9 +170,9 @@ class Controller(Node):
         self.image_publisher.publish(img_msg)
 
         # Show the image (The window logic in __init__ allows this to be resizable)
-        cv2.imshow('BlueROV2 Camera', img)
-        if cv2.waitKey(1) & 0xFF == ord('q'):
-            self.destroy_node()
+        #cv2.imshow('BlueROV2 Camera', img)
+        #if cv2.waitKey(1) & 0xFF == ord('q'):
+        #    self.destroy_node()
 
     def draw_gui(self, img, width, height):        
         img = cv2.rectangle(img,(0, height-100),(520,height),(0,0,0),-1)

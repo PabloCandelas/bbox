@@ -17,8 +17,8 @@
             <param name="conf_thres" value="0.5"/>
             
             <!-- Optional: Set initial target offset here if you know it, e.g. -->
-            <param name="target_offset_x" value="0"/>
-            <param name="target_offset_y" value="0"/>
+            <param name="target_offset_x" value="-20"/>
+            <param name="target_offset_y" value="290"/>
         </node>
 
         <!-- 3. Visual Servoing Node -->

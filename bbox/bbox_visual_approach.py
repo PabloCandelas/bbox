@@ -23,7 +23,7 @@ class BBoxVisualApproach(Node):
         # --- PARAMETERS ---
         self.declare_parameter('kp_heave', 0.5) 
         self.declare_parameter('ki_heave', 0.05)   
-        self.declare_parameter('heave_i_max', 0.15) 
+        self.declare_parameter('heave_i_max', 0.1) 
         
         self.declare_parameter('kp_yaw', 0.00045)    
         self.declare_parameter('kp_yaw_d', 0.00015)   
@@ -31,12 +31,12 @@ class BBoxVisualApproach(Node):
         
         self.declare_parameter('kp_sway', 0.0025)
         self.declare_parameter('ki_sway', 0.0005)   
-        self.declare_parameter('sway_i_max', 0.1)   
+        self.declare_parameter('sway_i_max', 0.08)   
 
         # Final Stage Gains (Softer for Stage 6 & 7)
         self.declare_parameter('kp_yaw_final', 0.0002)   # Very soft yaw
-        self.declare_parameter('kp_sway_final', 0.002)   # Soft sway
-        self.declare_parameter('kp_surge_final', 0.005)  # Slow creep surge
+        self.declare_parameter('kp_sway_final', 0.003)   # Soft sway
+        self.declare_parameter('kp_surge_final', 0.004)  # Slow creep surge
 
         # Thresholds
         self.declare_parameter('center_deadzone_x', 40) 
@@ -47,13 +47,13 @@ class BBoxVisualApproach(Node):
         # New Phase 5/6 Params
         self.declare_parameter('sway_tolerance_final', 5.0) 
         self.declare_parameter('altitude_tolerance_final', 0.04) 
-        self.declare_parameter('target_altitude_final', -4.79) 
+        self.declare_parameter('target_altitude_final', -4.815) 
         self.declare_parameter('final_surge_speed', 0.4) 
         
         # TARGETS
-        self.declare_parameter('target_altitude', -4.70) 
+        self.declare_parameter('target_altitude', -4.65) 
         self.declare_parameter('target_height_px', 250.0) 
-        self.declare_parameter('target_height_final_px', 450.0)   
+        self.declare_parameter('target_height_final_px', 475.0)   
 
         # DEBUG FLAG
         self.declare_parameter('debug_prints', True)
@@ -365,7 +365,7 @@ class BBoxVisualApproach(Node):
                 # 3. Surge (Maintain NEW LARGER Box Size)
                 current_h = self.box_h
                 height_err = self.target_height_final - current_h
-                cmd.linear.x = self.kp_surge * height_err
+                cmd.linear.x = self.kp_surge_final * height_err
                 cmd.linear.x = max(min(cmd.linear.x, 0.2), -0.2) 
 
                 # Exit Logic
